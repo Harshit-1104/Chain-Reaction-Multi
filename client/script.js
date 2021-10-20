@@ -37,6 +37,15 @@ $(document).ready(function () {
 
   grid = h.createGrid(gridSize);
 
+  $(".syncMat").click(function () {
+    socket.emit("sync_mat", { roomId: room });
+  });
+
+  socket.on("sync_mat", (data) => {
+    console.log(data);
+    h.syncGrid(data.gameMatrix);
+  });
+
   $(".grid").click(function () {
     var [X, Y] = h.getCoords($(this).index());
 

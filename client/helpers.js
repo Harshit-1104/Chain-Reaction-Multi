@@ -58,6 +58,28 @@ export default {
     return grid;
   },
 
+  syncGrid(serverMatrix) {
+    // update the in-memory grid first
+    for (var i = 0; i < grid.length; i++) {
+      for (var j = 0; j < grid[0].length; j++) {
+        grid[i][j] = serverMatrix[i][j];
+      }
+    }
+
+    for (var rows = 0; rows < grid.length - 2; rows++) {
+      for (var columns = 0; columns < grid.length - 2; columns++) {
+        $("#container").append(
+          `<div class='grid'>${
+            grid[rows + 1][columns + 1][0]
+          }<sub class='sub'>(${rows + 1}, ${columns + 1})</sub></div>`
+        );
+      }
+    }
+
+    $(".grid").width(500 / x);
+    $(".grid").height(500 / x);
+  },
+
   // function that prompts the user to select the number of boxes in a new grid
   // the function then also creates that new grid
   refreshGrid() {
@@ -115,7 +137,7 @@ export default {
 
       console.log(curr, idx, ele.html()[0], lim);
 
-      if (parseInt(ele.html()[0]) < lim) {
+      if (grid[curr[0]][curr[1]][0] < lim) {
         grid[curr[0]][curr[1]][0] += 1;
         ele.css("color", colors[userID]);
         grid[curr[0]][curr[1]][1] = userID;
