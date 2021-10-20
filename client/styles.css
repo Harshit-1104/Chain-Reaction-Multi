@@ -1,0 +1,39 @@
+body {
+  background-color: rgb(0, 0, 0);
+}
+
+#container {
+  position: relative;
+  top: 30px;
+  outline: 2px solid rgb(255, 255, 255);
+  margin: auto;
+  height: 500px;
+  width: 500px;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chance {
+  color: rgb(0, 255, 0);
+  font-size: x-large;
+}
+
+.sub {
+  font-size: small;
+  color: aliceblue;
+}
+
+.grid {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: 1px solid rgb(255, 255, 255);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: blue;
+  font-size: xx-large;
+  user-select: none;
+}

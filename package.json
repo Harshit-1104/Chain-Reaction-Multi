@@ -1,0 +1,27 @@
+{
+  "name": "chain-reaction-multi",
+  "version": "1.0.0",
+  "description": "a multiplayer chain reaction game, made using socket-io",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harshit-1104/Chain-Reaction-Multi.git"
+  },
+  "keywords": [
+    "chain",
+    "reaction"
+  ],
+  "author": "MiHarsh and Harshit Gupta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Harshit-1104/Chain-Reaction-Multi/issues"
+  },
+  "homepage": "https://github.com/Harshit-1104/Chain-Reaction-Multi#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socketio": "^1.0.0"
+  }
+}
