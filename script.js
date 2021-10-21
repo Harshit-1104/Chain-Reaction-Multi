@@ -8,11 +8,25 @@ const port = process.env.PORT || 3000;
 
 const expressServer = app.listen(port);
 const io = socketio(expressServer);
+const url = require('url');
 
-app.use("/", express.static(path.join(__dirname, "client")));
+app.use(express.static(path.join(__dirname, "client")));
+app.use(express.urlencoded());
+app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.sendFile(__dirname + "/client/home.html");
+});
+
+app.post("/createRoom", (req, res) => {
+  console.log(req.body);
+  return res.redirect("/game?roomid=" + req.body.roomName + "?user=" + req.body.userName);
+})
+
+app.get("/game", (req, res) => {
+  let urlObject = url.parse(req.originalUrl, true);
+  console.log(urlObject, urlObject.query);
+  res.sendFile(__dirname + "/client/game.html");
 });
 
 let turn = 0;
@@ -28,20 +42,22 @@ function createSchema() {
   };
 }
 
-io.of("/").on("connection", (socket) => {
+io.of("/game").on("connection", (socket) => {
   socket.on("subscribe", (data) => {
+    console.log(data);
     socket.join(data.socketId); // join the sockets
     socket.join(data.room);
 
     let id = socket.adapter.rooms[data.room].length;
 
     // Store game-data
-
     roomDetails[data.socketId] = data.room;
-
+    console.log(roomDetails);
+    
     if (cache[data.room] === undefined) {
       let schema = createSchema();
       cache[data.room] = schema;
+      console.log(schema);
     }
 
     cache[data.room].playerQueue.push(id);

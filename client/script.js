@@ -16,12 +16,13 @@ import h from "./helpers.js";
 // create a 16x16 grid when the page loads
 // creates a hover effect that changes the color of a square to black when the mouse passes over it, leaving a (pixel) trail through the grid
 // allows the click of a button to prompt the user to create a new grid
+
 $(document).ready(function () {
   let socket = io("/");
-
   socket.on("connect", () => {
     //set socketId
     socketId = socket.io.engine.id;
+    console.log(socketId);
 
     socket.emit("subscribe", {
       room: room,

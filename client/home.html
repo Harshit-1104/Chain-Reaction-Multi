@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <center>
+      <button id="toggle-create">Create A Room</button>
+      <button id="toggle-join">Join A Room</button>
+    </center>
+
+    <div id="container">
+      <form id="createRoom" action="/createRoom" method="post">
+        <div class="form-group">
+          <label for="roomName">Enter Room Name</label>
+          <input type="text" name="roomName" class="form-control" id="roomName" placeholder="ICU...">
+        </div>
+        <div class="form-group">
+          <label for="userName">Enter User Name</label>
+          <input type="text" name="userName" class="form-control" id="userName" placeholder="Demon Slayer...">
+        </div>
+        <input type="submit" id="submit">
+      </form>
+
+      <form id="joinRoom">
+        <div class="form-group">
+          <label for="roomName">Room to join</label>
+          <input type="text" name="roomName" class="form-control" id="roomName" placeholder="ICU...">
+        </div>
+        <div class="form-group">
+          <label for="userName">Enter User Name</label>
+          <input type="text" name="userName" class="form-control" id="userName" placeholder="Demon Slayer...">
+        </div>
+        <input type="submit">
+      </form>
+      <br /><br />
+    </div>
+  </body>
+
+  <script>
+    $(document).ready(function() {
+      $("#joinRoom").hide();
+    })
+
+    $("#toggle-create").click(function(){
+      $("#joinRoom").hide().attr("formnovalidate");
+      $("#createRoom").show();
+    });
+
+    $("#toggle-join").click(function(){
+        $("#createRoom").hide().attr("formnovalidate");
+        $("#joinRoom").show();
+    });
+  </script>
+</html>
