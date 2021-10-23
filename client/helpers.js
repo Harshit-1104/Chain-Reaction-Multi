@@ -48,11 +48,7 @@ export default {
 
     for (var rows = 0; rows < x; rows++) {
       for (var columns = 0; columns < x; columns++) {
-        $("#container").append(
-          `<div class='grid'>${
-            grid[rows + 1][columns + 1][0]
-          }<sub class='sub'>(${rows + 1}, ${columns + 1})</sub></div>`
-        );
+        $("#container").append(`<div class="grid"></div>`);
       }
     }
 
@@ -111,11 +107,21 @@ export default {
         idx = this.getIdx(rows + 1, columns + 1);
         ele = $(".grid").eq(idx);
 
-        ele.html(
-          `${grid[rows + 1][columns + 1][0]}<sub class='sub'>(${rows + 1}, ${
-            columns + 1
-          })</sub>`
-        );
+        // ele.html(
+        //   `${grid[rows + 1][columns + 1][0]}<sub class='sub'>(${rows + 1}, ${
+        //     columns + 1
+        //   })</sub>`
+        // );
+
+        if (grid[rows + 1][columns + 1][0] === 1) {
+          ele.html(this.renderOne(colors[grid[rows + 1][columns + 1][1]]));
+        } else if (grid[rows + 1][columns + 1][0] === 2) {
+          ele.html(this.renderTwo(colors[grid[rows + 1][columns + 1][1]]));
+        } else if (grid[rows + 1][columns + 1][0] === 3) {
+          ele.html(this.renderThree(colors[grid[rows + 1][columns + 1][1]]));
+        } else {
+          ele.html("");
+        }
 
         if (colors[grid[rows + 1][columns + 1][1]] == -1)
           ele.css("color", "#0000ff");
@@ -197,13 +203,48 @@ export default {
         queue.push([curr[0], curr[1] - 1]);
       }
 
-      ele.html(
-        `${grid[curr[0]][curr[1]][0]}<sub class='sub'>(${curr[0]}, ${
-          curr[1]
-        })</sub>`
-      );
+      if (grid[curr[0]][curr[1]][0] === 1) {
+        ele.html(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
+      } else if (grid[curr[0]][curr[1]][0] === 2) {
+        ele.html(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]));
+      } else if (grid[curr[0]][curr[1]][0] === 3) {
+        ele.html(this.renderThree(colors[grid[curr[0]][curr[1]][1]]));
+      } else {
+        ele.html("");
+      }
+
+      // `${grid[curr[0]][curr[1]][0]}<sub class='sub'>(${curr[0]}, ${
+      //   curr[1]
+      // })</sub>`
     }
 
     $(".chance").css("color", colors[userID]);
+  },
+
+  renderOne(color) {
+    return `
+              <div class="ldng rotateSphere" style="background-color: ${color}"></div>
+            `;
+  },
+
+  renderTwo(color) {
+    return `
+    <div class="div2b">
+      <div class="ldng rotateSphere" style="background-color: ${color}"></div>
+      <div class="ldng rotateSphere overlapHorizontal" style="background-color: ${color}"></div>
+    </div>
+    `;
+  },
+
+  renderThree(color) {
+    return `
+    <div class="div3b rotating-box">
+      <div class="div2b">
+        <div class="ldng rotateSphere" style="background-color: ${color}"></div>
+        <div class="ldng rotateSphere overlapHorizontal" style="background-color: ${color}"></div>
+      </div>
+      <div class="ldng red rotateSphere overlapVertical" style="background-color: ${color}"></div>
+    </div>
+ `;
   },
 };
