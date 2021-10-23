@@ -108,11 +108,16 @@ io.of("/").on("connection", (socket) => {
 
       if (cache[data.room].cntReady == cache[data.room].roomSize) {
         console.log("All are ready");
-
-        socket.emit("gameStart", {
+      
+        io.sockets.in(data.room).emit("gameStart", {
           users: cache[data.room].users,
         });
-      } else console.log("Not All are ready");
+
+        io.sockets.in(data.room).emit("isTurn", { numberOfTurns: 0, userTurn: 0 });
+        cache[data.room].turns++;
+      }
+      else
+        console.log("Not All are ready");
     }
   });
 
@@ -126,9 +131,11 @@ io.of("/").on("connection", (socket) => {
     updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.room);
 
     const turns = cache[data.room].turns;
+    console.log(turns);
+
     socket.broadcast.to(data.room).emit("isTurn", {
       numberOfTurns: turns,
-      userTurn: (turns % socket.adapter.rooms[data.room].length) + 1,
+      userTurn: (turns % (socket.adapter.rooms[data.room].length)),
     });
 
     cache[data.room].turns++;
