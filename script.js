@@ -102,9 +102,11 @@ io.of("/").on("connection", (socket) => {
       if (cache[data.room].cntReady == cache[data.room].roomSize) {
         console.log("All are ready");
       
-        socket.emit("gameStart", {
+        io.sockets.in(data.room).emit("gameStart", {
           users: cache[data.room].users,
         });
+
+        io.sockets.in(data.room).emit("isTurn", { numberOfTurns: 0, userTurn: 0 });
       }
       else
         console.log("Not All are ready");

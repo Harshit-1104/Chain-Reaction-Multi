@@ -1,5 +1,3 @@
-import e from "express";
-
 var grid;
 var gridSize = 8;
 var numberOfTurns;
@@ -61,6 +59,8 @@ export default {
     $(".grid").width(500 / x);
     $(".grid").height(500 / x);
     (numberOfTurns = 0);
+
+    console.log("Grid Created");
 
     return grid;
   },

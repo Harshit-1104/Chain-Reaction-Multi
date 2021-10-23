@@ -78,7 +78,7 @@ $(document).ready(function () {
   $(".grid").click(function () {
     var [X, Y] = h.getCoords($(this).index());
 
-    if (grid[X][Y][1] !== userID && grid[X][Y][1] !== 0) {
+    if (grid[X][Y][1] !== userID && grid[X][Y][1] !== -1) {
       return;
     }
 
