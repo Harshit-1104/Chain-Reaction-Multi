@@ -75,8 +75,9 @@ $(document).ready(function () {
     h.syncGrid(data.gameMatrix);
   });
 
-  $(".grid").click(function () {
+  $(document).on("click", ".grid", function () {
     var [X, Y] = h.getCoords($(this).index());
+    console.log(grid[X][Y][1], X, Y);
 
     if (grid[X][Y][1] !== userID && grid[X][Y][1] !== -1) {
       return;
