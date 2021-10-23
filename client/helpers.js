@@ -123,9 +123,6 @@ export default {
           ele.css("color", colors[grid[rows+1][columns+1][1]]);
       }
     }
-
-    $(".grid").width(500 / x);
-    $(".grid").height(500 / x);
   },
 
   // function that prompts the user to select the number of boxes in a new grid
