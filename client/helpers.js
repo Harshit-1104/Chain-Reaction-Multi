@@ -1,3 +1,5 @@
+import e from "express";
+
 var grid;
 var gridSize = 8;
 var numberOfTurns;
@@ -5,7 +7,43 @@ var cnt1, cnt2;
 
 var colors = ["green", "red", "orange", "violet", "indigo", "yellow"];
 
-export default {
+export default {  
+  addPlayer(player) {
+    $("#lobbyContainer").append(
+      `<div class="card" id="${player.id}">
+        <h5 class="card-header">${player.username}</h5>
+      </div>
+      <br>`
+    );
+  },
+
+  createLobby(users, socketID) {
+    for (const [key, value] of Object.entries(users)) {
+      if (key === socketID) {
+        $("#lobbyContainer").append(
+          `<div class="card" id="${value.id}">
+            <h5 class="card-header">${value.username}</h5>
+            <div class="card-body">
+              <input type="checkbox" class="btn btn-primary" id="isReady">Ready</input>
+            </div>
+          </div>
+          <br>`
+        );
+      } else {
+        $("#lobbyContainer").append(
+          `<div class="card" id="${value.id}">
+            <h5 class="card-header">${value.username}</h5>
+          </div>
+          <br>`
+        );
+      }
+    }
+  },
+
+  removePlayer(id) {
+    $(`#${id}`).remove();
+  },
+
   createGrid(x) {
     x = parseInt(x);
     grid = this.initializeGrid(x, x);
@@ -22,7 +60,7 @@ export default {
 
     $(".grid").width(500 / x);
     $(".grid").height(500 / x);
-    (numberOfTurns = 0), (cnt1 = 0), (cnt2 = 0);
+    (numberOfTurns = 0);
 
     return grid;
   },
@@ -41,7 +79,7 @@ export default {
 
     for (var i = 0; i < grid.length; i++) {
       for (var j = 0; j < grid[0].length; j++) {
-        grid[i][j] = [0, 0];
+        grid[i][j] = [0, -1];
       }
     }
 
@@ -66,13 +104,23 @@ export default {
       }
     }
 
+    let ele, idx;
+
     for (var rows = 0; rows < grid.length - 2; rows++) {
       for (var columns = 0; columns < grid.length - 2; columns++) {
-        $("#container").append(
-          `<div class='grid'>${
-            grid[rows + 1][columns + 1][0]
-          }<sub class='sub'>(${rows + 1}, ${columns + 1})</sub></div>`
+        idx = this.getIdx(rows+1, columns+1);
+        ele = $(".grid").eq(idx);
+
+        ele.html(
+          `${grid[rows+1][columns+1][0]}<sub class='sub'>(${rows+1}, ${
+            columns+1
+          })</sub>`
         );
+        
+        if (colors[grid[rows+1][columns+1][1]] == -1)
+          ele.css("color", "#0000ff");
+        else
+          ele.css("color", colors[grid[rows+1][columns+1][1]]);
       }
     }
 
@@ -141,9 +189,10 @@ export default {
         grid[curr[0]][curr[1]][0] += 1;
         ele.css("color", colors[userID]);
         grid[curr[0]][curr[1]][1] = userID;
+
       } else {
         grid[curr[0]][curr[1]][0] = 0;
-        grid[curr[0]][curr[1]][1] = 0;
+        grid[curr[0]][curr[1]][1] = -1; // default
 
         ele.css("color", "#0000ff");
 

@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"
+    ></script>
+    <script type="module" src="script.js"></script>
+    <script type="text/javascript" src="proto.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+
+  <body>
+    <div id="gameLobby">
+      <center><h1>Lobby</h1></center>
+      <div id="lobbyContainer">
+
+      </div>
+    </div>
+
+    <div id="gameArena">
+      <center>
+        <button class="newGrid">New Grid</button>
+        <button class="syncMat">Synchronize Matrix</button>
+      </center>
+      <br />
+      <center><div class="chance">Turn</div></center>
+
+      <div id="container"></div>
+    </div>
+    <br /><br />
+  </body>
+</html>

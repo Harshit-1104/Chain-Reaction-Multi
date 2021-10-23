@@ -4,6 +4,9 @@ let socketio = require("socket.io");
 
 let path = require("path");
 
+let cache = {};
+let roomDetails = {};
+
 const port = process.env.PORT || 3000;
 
 const expressServer = app.listen(port);
@@ -19,83 +22,115 @@ app.get("/", (req, res) => {
 });
 
 app.post("/createRoom", (req, res) => {
-  console.log(req.body);
-  return res.redirect("/game?roomid=" + req.body.roomName + "?user=" + req.body.userName);
-})
-
-app.get("/game", (req, res) => {
-  let urlObject = url.parse(req.originalUrl, true);
-  console.log(urlObject, urlObject.query);
-  res.sendFile(__dirname + "/client/game.html");
+  return res.redirect("/lobby?room=" + req.body.roomName + "&user=" + req.body.userName + "&size=" + req.body.numPlayers);
 });
 
-let turn = 0;
-
-let cache = {};
-let roomDetails = {};
+app.get("/lobby", (req, res) => {
+  res.sendFile(__dirname + "/client/lobby.html");
+});
 
 function createSchema() {
   return {
     playerQueue: [],
-    gameMatrix: initializeGrid(8, 8),
     users: {},
+    roomSize: 0,
+    cntReady: 0,
+    turns: 0,
+    gameMatrix: initializeGrid(8, 8),
   };
 }
 
-io.of("/game").on("connection", (socket) => {
+io.of("/").on("connection", (socket) => {
   socket.on("subscribe", (data) => {
     console.log(data);
-    socket.join(data.socketId); // join the sockets
+    socket.join(data.socketID); // join the sockets
     socket.join(data.room);
 
-    let id = socket.adapter.rooms[data.room].length;
-
-    // Store game-data
-    roomDetails[data.socketId] = data.room;
-    console.log(roomDetails);
+    let id = socket.adapter.rooms[data.room].length-1;
     
+    // shifted room details in lobby
+    // room details -> socketID = roomid
+    roomDetails[data.socketID] = data.room;
+
     if (cache[data.room] === undefined) {
       let schema = createSchema();
       cache[data.room] = schema;
-      console.log(schema);
     }
 
     cache[data.room].playerQueue.push(id);
-    cache[data.room].users[data.socketId] = {
+    cache[data.room].users[data.socketID] = {
       id: id,
       counts: 0,
+      username: data.username,
+      readyStatus: false,
     };
+
+    cache[data.room].roomSize = data.roomSize;
 
     // send ID Number to the sockets.
     socket.emit("playerInfo", { id: id, d: cache[data.room] });
 
+    // broadcasting new player info
+    socket.broadcast.to(data.room).emit("newPlayerInfo", {
+      newPlayer: cache[data.room].users[data.socketID],
+    });
+
+    /*
     if (socket.adapter.rooms[data.room].length === 1) {
       // first turn would be of this player
       turn = 0;
       socket.emit("isTurn", { numberOfTurns: 0, userTurn: turn + 1 });
       turn += 1;
+    }*/
+  });
+
+  socket.on("playerStatus", (data) => {
+    console.log(data);
+
+    cache[data.room].users[data.socketID].readyStatus = data.status;
+    
+    if (data.status)
+      cache[data.room].cntReady++;
+    else
+      cache[data.room].cntReady--;
+
+    console.log(cache[data.room].cntReady);
+
+    if (Object.keys(cache[data.room].users).length == cache[data.room].roomSize) {
+      console.log("All have arrived");
+
+      if (cache[data.room].cntReady == cache[data.room].roomSize) {
+        console.log("All are ready");
+      
+        socket.emit("gameStart", {
+          users: cache[data.room].users,
+        });
+      }
+      else
+        console.log("Not All are ready");
     }
   });
 
   socket.on("gameInfo", (data) => {
-    socket.to(data.roomId).emit("gameInfo", {
+    socket.to(data.room).emit("gameInfo", {
       playerClick: data.userClick,
       playerID: data.userID,
     });
 
     // upgrade the matrix in server - sole truth #Game Server
-    updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.roomId);
+    updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.room);
 
-    socket.broadcast.to(data.roomId).emit("isTurn", {
-      numberOfTurns: turn,
-      userTurn: (turn % socket.adapter.rooms[data.roomId].length) + 1,
+    const turns = cache[data.room].turns;
+    socket.broadcast.to(data.room).emit("isTurn", {
+      numberOfTurns: turns,
+      userTurn: (turns % socket.adapter.rooms[data.room].length)+1,
     });
 
-    turn++;
+    cache[data.room].turns++;
   });
 
   socket.on("sync_mat", (data) => {
-    socket.emit("sync_mat", { gameMatrix: cache[data.roomId]["gameMatrix"] });
+    socket.emit("sync_mat", { gameMatrix: cache[data.room]["gameMatrix"] });
   });
 
   socket.on("disconnect", (data) => {
@@ -103,15 +138,27 @@ io.of("/game").on("connection", (socket) => {
 
     let roomleft = roomDetails[socket.id];
     let deleted_id = cache[roomleft]["users"][socket.id]["id"];
+    console.log(roomleft, deleted_id, roomDetails);
 
     delete cache[roomleft]["users"][socket.id];
 
     const index = cache[roomleft]["playerQueue"].indexOf(deleted_id);
+    console.log(cache[roomleft].playerQueue);
     if (index > -1) {
       cache[roomleft]["playerQueue"].splice(index, 1);
     }
+    console.log(cache[roomleft].playerQueue);
+
+    socket.broadcast.to(roomleft).emit("playerLeft", {
+      id: deleted_id,
+    });
+  });
+  
+  socket.on("reconnect", (data) => {
+    console.log("reconnected", data);
   });
 });
+
 
 function initializeGrid(rows, columns) {
   let grid = new Array(rows + 2);
@@ -121,7 +168,7 @@ function initializeGrid(rows, columns) {
 
   for (var i = 0; i < grid.length; i++) {
     for (var j = 0; j < grid[0].length; j++) {
-      grid[i][j] = [0, 0];
+      grid[i][j] = [0, -1];
     }
   }
 
@@ -153,7 +200,6 @@ function updateGrid(X, Y, userID, roomName) {
     )
       continue;
 
-    var idx = getIdx(curr[0], curr[1], roomName);
     let lim = detLim(curr[0], curr[1], roomName);
 
     if (cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] < lim) {
@@ -162,7 +208,7 @@ function updateGrid(X, Y, userID, roomName) {
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = userID;
     } else {
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] = 0;
-      cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = 0;
+      cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = -1; // default
 
       queue.push([curr[0] + 1, curr[1]]);
       queue.push([curr[0] - 1, curr[1]]);
@@ -170,10 +216,6 @@ function updateGrid(X, Y, userID, roomName) {
       queue.push([curr[0], curr[1] - 1]);
     }
   }
-}
-
-function getIdx(X, Y, roomName) {
-  return (cache[roomName]["gameMatrix"].length - 2) * (X - 1) + Y - 1;
 }
 
 function detLim(X, Y, roomName) {

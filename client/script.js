@@ -2,12 +2,12 @@
 var myTurn = false;
 var grid;
 var gridSize = 8;
-var numberOfTurns;
-var cnt1, cnt2;
+var numberOfTurns = 0;
 
-var socketId = "";
+var socketID = "";
 let room = "ABCD";
 let username = "pqrt";
+let roomSize;
 let userID;
 let playerClick;
 let playerID;
@@ -18,28 +18,56 @@ import h from "./helpers.js";
 // allows the click of a button to prompt the user to create a new grid
 
 $(document).ready(function () {
+  const url = new URL(window.location.href);
+  room = url.searchParams.get('room');
+  username = url.searchParams.get('user');
+  roomSize = url.searchParams.get('size');
+
+  console.log(room);
+
   let socket = io("/");
   socket.on("connect", () => {
     //set socketId
-    socketId = socket.io.engine.id;
-    console.log(socketId);
-
+    socketID = socket.io.engine.id;
+  
     socket.emit("subscribe", {
       room: room,
-      socketId: socketId,
+      socketID: socketID,
       username: username,
-    });
-
-    socket.on("playerInfo", (data) => {
-      userID = data.id;
-      console.log(data);
+      roomSize: roomSize,
     });
   });
 
-  grid = h.createGrid(gridSize);
+  socket.on("playerInfo", (data) => {
+    userID = data.id;
+    console.log(data);
+
+    h.createLobby(data.d.users, socketID);
+  });
+
+  socket.on("newPlayerInfo", (data) => {
+    console.log(data.newPlayer);
+
+    h.addPlayer(data.newPlayer);
+  });
+
+  $(document).on("click", "#isReady", function() {
+    console.log("clicked");
+
+    socket.emit("playerStatus", {
+      room: room,
+      socketID: socketID,
+      status: this.checked,
+    });
+  });
+
+  socket.on("gameStart", (data) => {
+    console.log("Participants : ", data.users);
+    grid = h.createGrid(gridSize)
+  });
 
   $(".syncMat").click(function () {
-    socket.emit("sync_mat", { roomId: room });
+    socket.emit("sync_mat", { room: room });
   });
 
   socket.on("sync_mat", (data) => {
@@ -55,12 +83,13 @@ $(document).ready(function () {
     }
 
     console.log(X, Y, myTurn);
+
     if (myTurn) {
       h.updateGrid(X, Y, userID);
       socket.emit("gameInfo", {
         userID: userID,
         userClick: { X: X, Y: Y },
-        roomId: room,
+        room: room,
       });
       myTurn = false;
     }
@@ -110,4 +139,9 @@ $(document).ready(function () {
   //     }
   //   });
   // });
+
+  socket.on("playerLeft", (data) => {
+    console.log(data);
+    h.removePlayer(data.id);
+  })
 });
