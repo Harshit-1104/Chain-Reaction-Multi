@@ -193,11 +193,11 @@
   }
 }
 .rt-up {
-  -webkit-animation: rt-up 0.4s linear infinite;
-  -moz-animation: rt-up 0.4s linear infinite;
-  -ms-animation: rt-up 0.4s linear infinite;
-  -o-animation: rt-up 0.4s linear infinite;
-  animation: rt-up 0.4s linear infinite;
+  -webkit-animation: rt-up 0.4s linear;
+  -moz-animation: rt-up 0.4s linear;
+  -ms-animation: rt-up 0.4s linear;
+  -o-animation: rt-up 0.4s linear;
+  animation: rt-up 0.4s linear;
 }
 
 /* translation down */
@@ -220,11 +220,11 @@
   }
 }
 .rt-down {
-  -webkit-animation: rt-down 0.4s linear infinite;
-  -moz-animation: rt-down 0.4s linear infinite;
-  -ms-animation: rt-down 0.4s linear infinite;
-  -o-animation: rt-down 0.4s linear infinite;
-  animation: rt-down 0.4s linear infinite;
+  -webkit-animation: rt-down 0.4s linear;
+  -moz-animation: rt-down 0.4s linear;
+  -ms-animation: rt-down 0.4s linear;
+  -o-animation: rt-down 0.4s linear;
+  animation: rt-down 0.4s linear;
 }
 
 /* translation left */
@@ -247,11 +247,11 @@
   }
 }
 .rt-left {
-  -webkit-animation: rt-left 0.4s linear infinite;
-  -moz-animation: rt-left 0.4s linear infinite;
-  -ms-animation: rt-left 0.4s linear infinite;
-  -o-animation: rt-left 0.4s linear infinite;
-  animation: rt-left 0.4s linear infinite;
+  -webkit-animation: rt-left 0.4s linear;
+  -moz-animation: rt-left 0.4s linear;
+  -ms-animation: rt-left 0.4s linear;
+  -o-animation: rt-left 0.4s linear;
+  animation: rt-left 0.4s linear;
 }
 
 /* translation right */
@@ -274,11 +274,11 @@
   }
 }
 .rt-right {
-  -webkit-animation: rt-right 0.4s linear infinite;
-  -moz-animation: rt-right 0.4s linear infinite;
-  -ms-animation: rt-right 0.4s linear infinite;
-  -o-animation: rt-right 0.4s linear infinite;
-  animation: rt-right 0.4s linear infinite;
+  -webkit-animation: rt-right 0.4s linear;
+  -moz-animation: rt-right 0.4s linear;
+  -ms-animation: rt-right 0.4s linear;
+  -o-animation: rt-right 0.4s linear;
+  animation: rt-right 0.4s linear;
 }
 
 /*  */

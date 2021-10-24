@@ -15,11 +15,11 @@ export default {
     );
   },
 
-  createLobby(users, socketID) {
+  createLobby(users, userID) {
     for (const [key, value] of Object.entries(users)) {
-      if (key === socketID) {
+      if (key === userID) {
         $("#lobbyContainer").append(
-          `<div class="card" id="${value.id}">
+          `<div class="card" id="${userID}">
             <h5 class="card-header">${value.username}</h5>
             <div class="card-body">
               <input type="checkbox" class="btn btn-primary" id="isReady">Ready</input>
@@ -29,7 +29,7 @@ export default {
         );
       } else {
         $("#lobbyContainer").append(
-          `<div class="card" id="${value.id}">
+          `<div class="card" id="${userID}">
             <h5 class="card-header">${value.username}</h5>
           </div>
           <br>`
@@ -191,7 +191,28 @@ export default {
         grid[curr[0]][curr[1]][0] += 1;
         ele.css("color", colors[userID]);
         grid[curr[0]][curr[1]][1] = userID;
+
+        if (grid[curr[0]][curr[1]][0] === 1) {
+          ele.html(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
+        } else if (grid[curr[0]][curr[1]][0] === 2) {
+          ele.html(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]));
+        } else if (grid[curr[0]][curr[1]][0] === 3) {
+          ele.html(this.renderThree(colors[grid[curr[0]][curr[1]][1]]));
+        } else {
+          ele.html("");
+        }
       } else {
+        // perform animation here
+        ele.html(this.animate(colors[grid[curr[0]][curr[1]][1]]));
+
+        // remove the elements after animation finishes
+        $(".rm").bind(
+          "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
+          function (e) {
+            $(this).remove();
+          }
+        );
+
         grid[curr[0]][curr[1]][0] = 0;
         grid[curr[0]][curr[1]][1] = -1; // default
 
@@ -203,15 +224,15 @@ export default {
         queue.push([curr[0], curr[1] - 1]);
       }
 
-      if (grid[curr[0]][curr[1]][0] === 1) {
-        ele.html(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
-      } else if (grid[curr[0]][curr[1]][0] === 2) {
-        ele.html(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]));
-      } else if (grid[curr[0]][curr[1]][0] === 3) {
-        ele.html(this.renderThree(colors[grid[curr[0]][curr[1]][1]]));
-      } else {
-        ele.html("");
-      }
+      // if (grid[curr[0]][curr[1]][0] === 1) {
+      //   ele.html(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
+      // } else if (grid[curr[0]][curr[1]][0] === 2) {
+      //   ele.html(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]));
+      // } else if (grid[curr[0]][curr[1]][0] === 3) {
+      //   ele.html(this.renderThree(colors[grid[curr[0]][curr[1]][1]]));
+      // } else {
+      //   ele.html("");
+      // }
 
       // `${grid[curr[0]][curr[1]][0]}<sub class='sub'>(${curr[0]}, ${
       //   curr[1]
@@ -246,5 +267,20 @@ export default {
       <div class="ldng red rotateSphere overlapVertical" style="background-color: ${color}"></div>
     </div>
  `;
+  },
+
+  animate(color) {
+    return ` <div class="ldng rotateSphere rt-up rm" style="position: absolute;background-color: ${color}"></div>
+    <div class="ldng rotateSphere rt-down rm" style="position: absolute;background-color: ${color}"></div>
+    <div class="ldng rotateSphere rt-left rm" style="position: absolute;background-color: ${color}"></div>
+    <div class="ldng rotateSphere rt-right rm" style="position: absolute;background-color: ${color}"></div>`;
+  },
+
+  syncDelay(milliseconds) {
+    var start = new Date().getTime();
+    var end = 0;
+    while (end - start < milliseconds) {
+      end = new Date().getTime();
+    }
   },
 };

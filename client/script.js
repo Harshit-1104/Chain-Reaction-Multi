@@ -19,9 +19,9 @@ import h from "./helpers.js";
 
 $(document).ready(function () {
   const url = new URL(window.location.href);
-  room = url.searchParams.get('room');
-  username = url.searchParams.get('user');
-  roomSize = url.searchParams.get('size');
+  room = url.searchParams.get("room");
+  username = url.searchParams.get("user");
+  roomSize = url.searchParams.get("size");
 
   console.log(room);
 
@@ -29,7 +29,7 @@ $(document).ready(function () {
   socket.on("connect", () => {
     //set socketId
     socketID = socket.io.engine.id;
-  
+
     socket.emit("subscribe", {
       room: room,
       socketID: socketID,
@@ -42,28 +42,30 @@ $(document).ready(function () {
     userID = data.id;
     console.log(data);
 
-    h.createLobby(data.d.users, socketID);
+    h.createLobby(data.d.users, userID);
   });
 
   socket.on("newPlayerInfo", (data) => {
     console.log(data.newPlayer);
-
-    h.addPlayer(data.newPlayer);
+    if (data.isPlayer) {
+      h.addPlayer(data.newPlayer);
+    }
   });
 
-  $(document).on("click", "#isReady", function() {
+  $(document).on("click", "#isReady", function () {
     console.log("clicked");
 
     socket.emit("playerStatus", {
       room: room,
       socketID: socketID,
       status: this.checked,
+      userID: userID,
     });
   });
 
   socket.on("gameStart", (data) => {
     console.log("Participants : ", data.users);
-    grid = h.createGrid(gridSize)
+    grid = h.createGrid(gridSize);
   });
 
   $(".syncMat").click(function () {
@@ -144,5 +146,5 @@ $(document).ready(function () {
   socket.on("playerLeft", (data) => {
     console.log(data);
     h.removePlayer(data.id);
-  })
+  });
 });

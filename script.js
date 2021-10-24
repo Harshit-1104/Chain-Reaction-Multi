@@ -22,6 +22,8 @@ app.get("/", (req, res) => {
 });
 
 app.post("/createRoom", (req, res) => {
+  cache[req.body.roomName] = createSchema(req.body.numPlayers);
+
   return res.redirect(
     "/lobby?room=" +
       req.body.roomName +
@@ -36,14 +38,21 @@ app.get("/lobby", (req, res) => {
   res.sendFile(__dirname + "/client/lobby.html");
 });
 
-function createSchema() {
+function createSchema(roomSize) {
+  let arr = [];
+  for (let i = 0; i < roomSize; i++) {
+    arr.push(i);
+  }
+
   return {
     playerQueue: [],
     users: {},
-    roomSize: 0,
+    roomSize: roomSize,
+    globalIDs: arr,
     cntReady: 0,
     turns: 0,
     gameMatrix: initializeGrid(8, 8),
+    next_chance: 0,
   };
 }
 
@@ -53,48 +62,52 @@ io.of("/").on("connection", (socket) => {
     socket.join(data.socketID); // join the sockets
     socket.join(data.room);
 
-    let id = socket.adapter.rooms[data.room].length - 1;
+    let isPlayer;
 
-    // shifted room details in lobby
-    // room details -> socketID = roomid
-    roomDetails[data.socketID] = data.room;
-
+    // if globalIDs is empty -> room is full, else grab a ID
     if (cache[data.room] === undefined) {
-      let schema = createSchema();
-      cache[data.room] = schema;
+      console.log("Wrong Room");
+      // send a custom event to redirect to "NOT FOUND PAGE"
+      // use window.location.href = "/notFound"
+    } else {
+      // room is present
+
+      if (cache[data.room]["globalIDs"].length !== 0) {
+        // get a new ID for player
+        isPlayer = true;
+        let id = cache[data.room]["globalIDs"].shift();
+
+        // shifted room details in lobby
+        // room details -> socketID = roomid
+        roomDetails[data.socketID] = { room: data.room, playerID: id };
+
+        cache[data.room].playerQueue.push(id);
+        cache[data.room].users[id] = {
+          socketID: data.socketID,
+          counts: 0,
+          username: data.username,
+          readyStatus: false,
+        };
+
+        // send ID Number to the sockets.
+        socket.emit("playerInfo", { id: id, d: cache[data.room] });
+      } else {
+        console.log("room is full");
+        isPlayer = false;
+      }
+
+      // broadcasting new player info
+      socket.broadcast.to(data.room).emit("newPlayerInfo", {
+        newPlayer: data.socketID,
+        isPlayer: isPlayer,
+      });
     }
-
-    cache[data.room].playerQueue.push(id);
-    cache[data.room].users[data.socketID] = {
-      id: id,
-      counts: 0,
-      username: data.username,
-      readyStatus: false,
-    };
-
-    cache[data.room].roomSize = data.roomSize;
-
-    // send ID Number to the sockets.
-    socket.emit("playerInfo", { id: id, d: cache[data.room] });
-
-    // broadcasting new player info
-    socket.broadcast.to(data.room).emit("newPlayerInfo", {
-      newPlayer: cache[data.room].users[data.socketID],
-    });
-
-    /*
-    if (socket.adapter.rooms[data.room].length === 1) {
-      // first turn would be of this player
-      turn = 0;
-      socket.emit("isTurn", { numberOfTurns: 0, userTurn: turn + 1 });
-      turn += 1;
-    }*/
   });
 
   socket.on("playerStatus", (data) => {
     console.log(data);
 
-    cache[data.room].users[data.socketID].readyStatus = data.status;
+    cache[data.room].users[data.userID].readyStatus = data.status;
 
     if (data.status) cache[data.room].cntReady++;
     else cache[data.room].cntReady--;
@@ -108,16 +121,14 @@ io.of("/").on("connection", (socket) => {
 
       if (cache[data.room].cntReady == cache[data.room].roomSize) {
         console.log("All are ready");
-      
+
         io.sockets.in(data.room).emit("gameStart", {
           users: cache[data.room].users,
         });
 
-        io.sockets.in(data.room).emit("isTurn", { numberOfTurns: 0, userTurn: 0 });
+        send_chance(data.room, io);
         cache[data.room].turns++;
-      }
-      else
-        console.log("Not All are ready");
+      } else console.log("Not All are ready");
     }
   });
 
@@ -130,13 +141,15 @@ io.of("/").on("connection", (socket) => {
     // upgrade the matrix in server - sole truth #Game Server
     updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.room);
 
+    send_chance(data.room, io);
+
     const turns = cache[data.room].turns;
     console.log(turns);
 
-    socket.broadcast.to(data.room).emit("isTurn", {
-      numberOfTurns: turns,
-      userTurn: (turns % (socket.adapter.rooms[data.room].length)),
-    });
+    // socket.broadcast.to(data.room).emit("isTurn", {
+    //   numberOfTurns: turns,
+    //   userTurn: turns % socket.adapter.rooms[data.room].length,
+    // });
 
     cache[data.room].turns++;
   });
@@ -148,22 +161,35 @@ io.of("/").on("connection", (socket) => {
   socket.on("disconnect", (data) => {
     console.log("disconnected", socket.id);
 
-    let roomleft = roomDetails[socket.id];
-    let deleted_id = cache[roomleft]["users"][socket.id]["id"];
-    console.log(roomleft, deleted_id, roomDetails);
+    let details = roomDetails[socket.id];
 
-    delete cache[roomleft]["users"][socket.id];
+    if (details !== undefined) {
+      let roomleft = details.room;
+      // user comes in non existing-room, hence isnt added to that room
+      let deleted_id = details.playerID;
 
-    const index = cache[roomleft]["playerQueue"].indexOf(deleted_id);
-    console.log(cache[roomleft].playerQueue);
-    if (index > -1) {
-      cache[roomleft]["playerQueue"].splice(index, 1);
+      // add the id to globalIDs for new player to join;
+      cache[roomleft]["globalIDs"].push(deleted_id);
+      console.log(roomleft, deleted_id, roomDetails);
+
+      delete cache[roomleft]["users"][deleted_id];
+      delete roomDetails[socket.id];
+
+      const index = cache[roomleft]["playerQueue"].indexOf(deleted_id);
+      console.log(cache[roomleft].playerQueue);
+      if (index > -1) {
+        cache[roomleft]["playerQueue"].splice(index, 1);
+      }
+      console.log(cache[roomleft].playerQueue);
+
+      socket.broadcast.to(roomleft).emit("playerLeft", {
+        id: deleted_id,
+      });
+
+      // if the chance was of disconnected player, pass the chance
+      if (socket.id === cache[roomleft]["next_chance"])
+        send_chance(roomleft, io);
     }
-    console.log(cache[roomleft].playerQueue);
-
-    socket.broadcast.to(roomleft).emit("playerLeft", {
-      id: deleted_id,
-    });
   });
 
   socket.on("reconnect", (data) => {
@@ -272,3 +298,24 @@ Array.prototype.equals = function (array) {
 };
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "equals", { enumerable: false });
+
+function send_chance(roomName, io) {
+  // Condition -
+  // user has their chance, but due to some uncertainity, they disconnected.
+  // How to then switch chance to next user ?
+  // Implement a  `send_chance` function
+  // everytime user disconnects, check if the player with chance got disconnected? Send chance to next user
+
+  let next_chance = cache[roomName]["playerQueue"].shift();
+  cache[roomName]["next_chance"] = next_chance;
+
+  // if user hasn't disconnected push back into the queue
+
+  if (cache[roomName].users[next_chance] !== undefined) {
+    cache[roomName]["playerQueue"].push(next_chance);
+  }
+
+  io.sockets.in(roomName).emit("isTurn", {
+    userTurn: next_chance,
+  });
+}
