@@ -56,6 +56,10 @@ $(document).ready(function () {
     console.log("cnt", data);
   });
 
+  socket.on("removeLoser", (data) => {
+    console.log("lost", data);
+  });
+
   $(document).on("click", "#isReady", function () {
     console.log("clicked");
 

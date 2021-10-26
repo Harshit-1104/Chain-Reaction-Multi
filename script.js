@@ -58,7 +58,6 @@ function createSchema(roomSize) {
 
 io.of("/").on("connection", (socket) => {
   socket.on("subscribe", (data) => {
-    console.log(data);
     socket.join(data.socketID); // join the sockets
     socket.join(data.room);
 
@@ -106,14 +105,10 @@ io.of("/").on("connection", (socket) => {
   });
 
   socket.on("playerStatus", (data) => {
-    console.log(data);
-
     cache[data.room].users[data.userID].readyStatus = data.status;
 
     if (data.status) cache[data.room].cntReady++;
     else cache[data.room].cntReady--;
-
-    console.log(cache[data.room].cntReady);
 
     if (
       Object.keys(cache[data.room].users).length == cache[data.room].roomSize
@@ -145,12 +140,6 @@ io.of("/").on("connection", (socket) => {
     send_chance(data.room, io);
 
     const turns = cache[data.room].turns;
-    console.log(turns);
-
-    // socket.broadcast.to(data.room).emit("isTurn", {
-    //   numberOfTurns: turns,
-    //   userTurn: turns % socket.adapter.rooms[data.room].length,
-    // });
 
     cache[data.room].turns++;
   });
@@ -171,17 +160,15 @@ io.of("/").on("connection", (socket) => {
 
       // add the id to globalIDs for new player to join;
       cache[roomleft]["globalIDs"].push(deleted_id);
-      console.log(roomleft, deleted_id, roomDetails);
 
       delete cache[roomleft]["users"][deleted_id];
       delete roomDetails[socket.id];
 
       const index = cache[roomleft]["playerQueue"].indexOf(deleted_id);
-      console.log(cache[roomleft].playerQueue);
+
       if (index > -1) {
         cache[roomleft]["playerQueue"].splice(index, 1);
       }
-      console.log(cache[roomleft].playerQueue);
 
       socket.broadcast.to(roomleft).emit("playerLeft", {
         id: deleted_id,
@@ -255,6 +242,8 @@ function updateGrid(X, Y, userID, roomName, io) {
         if (prevUserID !== -1) {
           cache[roomName]["users"][prevUserID].counts -=
             cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] - 1; // decrement the counts of prev
+
+          removeLoser(io, roomName, prevUserID); //check if someone lost
         }
       }
     } else {
@@ -262,6 +251,11 @@ function updateGrid(X, Y, userID, roomName, io) {
 
       cache[roomName]["users"][prevUser].counts -=
         cache[roomName]["gameMatrix"][curr[0]][curr[1]][0]; //decrement count of current user
+
+      if (userID !== prevUser) {
+        // since userID can't be zero since it exploded into 4, so check only if it replaces any other
+        removeLoser(io, roomName, prevUser); //check if someone lost
+      }
 
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] = 0;
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = -1; // default
@@ -339,4 +333,20 @@ function send_chance(roomName, io) {
   io.sockets.in(roomName).emit("isTurn", {
     userTurn: next_chance,
   });
+}
+
+function removeLoser(io, roomName, playerID) {
+  if (cache[roomName]["users"][playerID].counts === 0) {
+    // remove the player from playerQueue, send other users
+
+    const index = cache[roomName]["playerQueue"].indexOf(playerID);
+    if (index > -1) {
+      cache[roomName]["playerQueue"].splice(index, 1);
+    }
+
+    io.sockets.in(roomName).emit("removeLoser", {
+      userID: playerID,
+      userName: cache[roomName]["users"][playerID]["username"],
+    });
+  }
 }
