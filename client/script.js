@@ -48,8 +48,12 @@ $(document).ready(function () {
   socket.on("newPlayerInfo", (data) => {
     console.log(data.newPlayer);
     if (data.isPlayer) {
-      h.addPlayer(data.newPlayer);
+      h.addPlayer(data);
     }
+  });
+
+  socket.on("cnt", (data) => {
+    console.log("cnt", data);
   });
 
   $(document).on("click", "#isReady", function () {

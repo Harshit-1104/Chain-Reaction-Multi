@@ -17,7 +17,7 @@ export default {
 
   createLobby(users, userID) {
     for (const [key, value] of Object.entries(users)) {
-      if (key === userID) {
+      if (parseInt(key) === userID) {
         $("#lobbyContainer").append(
           `<div class="card" id="${userID}">
             <h5 class="card-header">${value.username}</h5>

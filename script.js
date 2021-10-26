@@ -98,8 +98,9 @@ io.of("/").on("connection", (socket) => {
 
       // broadcasting new player info
       socket.broadcast.to(data.room).emit("newPlayerInfo", {
-        newPlayer: data.socketID,
+        id: data.socketID,
         isPlayer: isPlayer,
+        username: data.username,
       });
     }
   });
@@ -139,7 +140,7 @@ io.of("/").on("connection", (socket) => {
     });
 
     // upgrade the matrix in server - sole truth #Game Server
-    updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.room);
+    updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.room, io);
 
     send_chance(data.room, io);
 
@@ -222,7 +223,7 @@ function initializeGrid(rows, columns) {
   return grid;
 }
 
-function updateGrid(X, Y, userID, roomName) {
+function updateGrid(X, Y, userID, roomName, io) {
   var queue = [];
   queue.push([X, Y]);
 
@@ -240,10 +241,28 @@ function updateGrid(X, Y, userID, roomName) {
     let lim = detLim(curr[0], curr[1], roomName);
 
     if (cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] < lim) {
+      let prevUserID = cache[roomName]["gameMatrix"][curr[0]][curr[1]][1];
+      cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = userID;
+
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] += 1;
 
-      cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = userID;
+      if (prevUserID === userID) {
+        cache[roomName]["users"][userID].counts += 1;
+      } else {
+        cache[roomName]["users"][userID].counts +=
+          cache[roomName]["gameMatrix"][curr[0]][curr[1]][0]; // increment the count of current user
+
+        if (prevUserID !== -1) {
+          cache[roomName]["users"][prevUserID].counts -=
+            cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] - 1; // decrement the counts of prev
+        }
+      }
     } else {
+      let prevUser = cache[roomName]["gameMatrix"][curr[0]][curr[1]][1];
+
+      cache[roomName]["users"][prevUser].counts -=
+        cache[roomName]["gameMatrix"][curr[0]][curr[1]][0]; //decrement count of current user
+
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] = 0;
       cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = -1; // default
 
@@ -253,6 +272,8 @@ function updateGrid(X, Y, userID, roomName) {
       queue.push([curr[0], curr[1] - 1]);
     }
   }
+
+  io.sockets.in(roomName).emit("cnt", cache[roomName]);
 }
 
 function detLim(X, Y, roomName) {
