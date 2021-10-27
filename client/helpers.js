@@ -165,7 +165,7 @@ export default {
     else return 2;
   },
 
-  updateGrid(X, Y, userID) {
+  async updateGrid(X, Y, userID) {
     var queue = [];
     queue.push([X, Y]);
 
@@ -193,17 +193,28 @@ export default {
         grid[curr[0]][curr[1]][1] = userID;
 
         if (grid[curr[0]][curr[1]][0] === 1) {
-          ele.html(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
+          ele.append(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
         } else if (grid[curr[0]][curr[1]][0] === 2) {
-          ele.html(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]));
+          ele
+            .children(".ball")[0]
+            .replaceWith(
+              $.parseHTML(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]))[0]
+            );
         } else if (grid[curr[0]][curr[1]][0] === 3) {
-          ele.html(this.renderThree(colors[grid[curr[0]][curr[1]][1]]));
+          ele
+            .children(".ball")[0]
+            .replaceWith(
+              $.parseHTML(
+                this.renderThree(colors[grid[curr[0]][curr[1]][1]])
+              )[0]
+            );
         } else {
-          ele.html("");
+          ele.children(".ball")[0].replaceWith("");
         }
       } else {
         // perform animation here
-        ele.html(this.animate(colors[grid[curr[0]][curr[1]][1]]));
+        ele.append(this.animate(colors[grid[curr[0]][curr[1]][1]]));
+        ele.children(".ball")[0].replaceWith("");
 
         // remove the elements after animation finishes
         $(".rm").bind(
@@ -212,6 +223,8 @@ export default {
             $(this).remove();
           }
         );
+
+        await this.sleep(300);
 
         grid[curr[0]][curr[1]][0] = 0;
         grid[curr[0]][curr[1]][1] = -1; // default
@@ -223,64 +236,40 @@ export default {
         queue.push([curr[0], curr[1] + 1]);
         queue.push([curr[0], curr[1] - 1]);
       }
-
-      // if (grid[curr[0]][curr[1]][0] === 1) {
-      //   ele.html(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
-      // } else if (grid[curr[0]][curr[1]][0] === 2) {
-      //   ele.html(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]));
-      // } else if (grid[curr[0]][curr[1]][0] === 3) {
-      //   ele.html(this.renderThree(colors[grid[curr[0]][curr[1]][1]]));
-      // } else {
-      //   ele.html("");
-      // }
-
-      // `${grid[curr[0]][curr[1]][0]}<sub class='sub'>(${curr[0]}, ${
-      //   curr[1]
-      // })</sub>`
     }
 
     $(".chance").css("color", colors[userID]);
   },
 
   renderOne(color) {
-    return `
-              <div class="ldng rotateSphere" style="background-color: ${color}"></div>
-            `;
+    return `<div class="ldng rotateSphere ball" style="background-color: ${color}"></div>`;
   },
 
   renderTwo(color) {
-    return `
-    <div class="div2b">
+    return `<div class="div2b ball">
       <div class="ldng rotateSphere" style="background-color: ${color}"></div>
       <div class="ldng rotateSphere overlapHorizontal" style="background-color: ${color}"></div>
-    </div>
-    `;
+    </div>`;
   },
 
   renderThree(color) {
-    return `
-    <div class="div3b rotating-box">
+    return `<div class="div3b rotating-box ball">
       <div class="div2b">
         <div class="ldng rotateSphere" style="background-color: ${color}"></div>
         <div class="ldng rotateSphere overlapHorizontal" style="background-color: ${color}"></div>
       </div>
       <div class="ldng red rotateSphere overlapVertical" style="background-color: ${color}"></div>
-    </div>
- `;
+    </div>`;
   },
 
   animate(color) {
-    return ` <div class="ldng rotateSphere rt-up rm" style="position: absolute;background-color: ${color}"></div>
+    return `<div class="ldng rotateSphere rt-up rm" style="position: absolute;background-color: ${color}"></div>
     <div class="ldng rotateSphere rt-down rm" style="position: absolute;background-color: ${color}"></div>
     <div class="ldng rotateSphere rt-left rm" style="position: absolute;background-color: ${color}"></div>
     <div class="ldng rotateSphere rt-right rm" style="position: absolute;background-color: ${color}"></div>`;
   },
 
-  syncDelay(milliseconds) {
-    var start = new Date().getTime();
-    var end = 0;
-    while (end - start < milliseconds) {
-      end = new Date().getTime();
-    }
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   },
 };
