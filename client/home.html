@@ -1,6 +1,6 @@
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="homeStyles.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
     <script
       type="text/javascript"
       src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"
@@ -8,109 +8,109 @@
   </head>
 
   <body>
-    <video id="bgVideo" preload="true" autoplay loop muted>
-      <source src="./Video/Black - 13495.mp4" type="video/mp4">
-    </video>
-
-    <div class="container">
-      <div class="form">
-        <ul class="tab-group">
-          <li class="tab active"><a href="#createRoom">Create Room</a></li>
-          <li class="tab"><a href="#joinRoom">Join Room</a></li>
-        </ul>
-        
-        <div class="tab-content">
-          <div id="createRoom">
-            <form action="/createRoom" method="post">
-            
-              <div class="field-wrap">
-                <label>
-                  Room Name
-                </label>
-                <input type="text" required autocomplete="off" id="roomName" name="roomName" />
-              </div>
-
-              <div class="field-wrap">
-                <label>
-                  User Name
-                </label>
-                <input type="text" id="userName" name="userName" required autocomplete="off"/>
-              </div>
-            
-              <div class="field-wrap">
-                <label>
-                  Number of players
-                </label>
-                <input type="number" min="2" max="6" required autocomplete="off" id="numPlayers" name="numPlayers"/>
-              </div>
-            
-              <button type="submit" class="button button-block"/>Create</button>          
-            </form>
-
+    <div class="login_signup">
+      <div class="form-structor">
+        <form class="signup" action="/createRoom" method="post">
+          <h2 class="form-title" id="signup"><span>or</span>Sign up</h2>
+          <div class="form-holder">
+            <input
+              type="text"
+              required
+              autocomplete="off"
+              id="roomName"
+              name="roomName"
+              class="input"
+              placeholder="Enter roomName"
+            />
+            <input
+              type="text"
+              required
+              autocomplete="off"
+              id="userName"
+              name="userName"
+              class="input"
+              placeholder="Enter userName"
+            />
+            <input
+              type="number"
+              min="2"
+              max="6"
+              required
+              autocomplete="off"
+              id="numPlayers"
+              name="numPlayers"
+              class="input"
+              placeholder="Number of Players"
+            />
           </div>
-          
-          <div id="joinRoom">   
-            <form action="/joinRoom" method="post">
-            
-              <div class="field-wrap">
-                <label>
-                  Room Name
-                </label>
-                <input type="text" required autocomplete="off" id="roomName" name="roomName"/>
-              </div>
-            
-              <div class="field-wrap">
-                <label>
-                  User Name
-                </label>
-                <input type="text" required autocomplete="off" id="userName" name="userName"/>
-              </div>
-            
-              <button type="submit" class="button button-block"/>Join</button>
-            </form>
-          </div>
-          
-        </div><!-- tab-content -->
-      </div> <!-- /form -->
+          <button class="submit-btn">Sign up</button>
+        </form>
+        <div class="login slide-up">
+          <form action="/joinRoom" method="post" class="center">
+            <h2 class="form-title" id="login"><span>or</span>Join Room</h2>
+            <div class="form-holder">
+              <input
+                type="text"
+                required
+                autocomplete="off"
+                id="roomName"
+                name="roomName"
+                class="input"
+                placeholder="Enter roomName"
+              />
+              <input
+                type="text"
+                required
+                autocomplete="off"
+                id="userName"
+                name="userName"
+                class="input"
+                placeholder="Enter userName"
+              />
+            </div>
+            <button class="submit-btn">Log in</button>
+          </form>
+        </div>
+      </div>
     </div>
-  </body>
 
-  <script>
-    $('.form').find('input, textarea').on('keypress blur focus change', function (e) {  
-      var $this = $(this),
-          label = $this.prev('label');
-      console.log(e.type);
+    <script>
+      const loginBtn = document.getElementById("login");
+      const signupBtn = document.getElementById("signup");
 
-      if (e.type === 'keypress' || e.type === 'change') {
-        label.addClass('active highlight');
-      } else if (e.type === 'blur') {
-        if( $this.val() === '' ) {
-          label.removeClass('active highlight'); 
-        } else {
-          label.removeClass('highlight');   
-        }   
-      } else if (e.type === 'focus') {
-        if( $this.val() === '' ) {
-          label.removeClass('highlight'); 
-        } 
-        else if( $this.val() !== '' ) {
-          label.addClass('highlight');
+      loginBtn.addEventListener("click", (e) => {
+        let parent = e.target.parentNode.parentNode;
+
+        let flag = false;
+
+        Array.from(e.target.parentNode.parentNode.classList).find((element) => {
+          if (element === "slide-up") {
+            flag = true;
+          }
+        });
+
+        if (flag) {
+          signupBtn.parentNode.classList.add("slide-up");
+          parent.classList.remove("slide-up");
         }
-      }
-    });
+      });
 
-    $('.tab a').on('click', function (e) {
-      
-      e.preventDefault();
-      
-      $(this).parent().addClass('active');
-      $(this).parent().siblings().removeClass('active');
-      
-      target = $(this).attr('href');
+      signupBtn.addEventListener("click", (e) => {
+        let parent = e.target.parentNode;
 
-      $('.tab-content > div').not(target).hide();
-      
-      $(target).fadeIn(600);  
-    });
-  </script>
+        // if flag true -> show signup
+        let flag = false;
+        Array.from(e.target.parentNode.classList).find((element) => {
+          if (element === "slide-up") {
+            flag = true;
+          }
+        });
+
+        if (flag) {
+          parent.classList.remove("slide-up");
+          loginBtn.parentNode.parentNode.classList.add("slide-up");
+        }
+      });
+    </script>
+  </body>
 </html>
