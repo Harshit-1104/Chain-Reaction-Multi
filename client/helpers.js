@@ -224,7 +224,7 @@ export default {
           }
         );
 
-        await this.sleep(300);
+        // await this.sleep(150);
 
         grid[curr[0]][curr[1]][0] = 0;
         grid[curr[0]][curr[1]][1] = -1; // default
