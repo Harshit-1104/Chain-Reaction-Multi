@@ -25,6 +25,10 @@ app.post("/createRoom", (req, res) => {
   return res.redirect("/lobby?room=" + req.body.roomName + "&user=" + req.body.userName + "&size=" + req.body.numPlayers);
 });
 
+app.post("/joinRoom", (req, res) => {
+  return res.redirect("/lobby?room=" + req.body.roomName + "&user=" + req.body.userName)
+});
+
 app.get("/lobby", (req, res) => {
   res.sendFile(__dirname + "/client/lobby.html");
 });
@@ -74,18 +78,15 @@ io.of("/").on("connection", (socket) => {
     socket.broadcast.to(data.room).emit("newPlayerInfo", {
       newPlayer: cache[data.room].users[data.socketID],
     });
-
-    /*
-    if (socket.adapter.rooms[data.room].length === 1) {
-      // first turn would be of this player
-      turn = 0;
-      socket.emit("isTurn", { numberOfTurns: 0, userTurn: turn + 1 });
-      turn += 1;
-    }*/
   });
 
   socket.on("playerStatus", (data) => {
     console.log(data);
+
+    io.sockets.in(data.room).emit("playerStatus", {
+      status: data.status,
+      id: cache[data.room].users[data.socketID].id,
+    });
 
     cache[data.room].users[data.socketID].readyStatus = data.status;
     
@@ -132,6 +133,16 @@ io.of("/").on("connection", (socket) => {
     });
 
     cache[data.room].turns++;
+  });
+
+  socket.on("messageSent", (data) => {
+    io.sockets.in(data.room).emit("messageRecieved", {
+      room: data.room,
+      userID: data.userID,
+      msg: data.msg,
+      time: data.time,
+      username: data.username,
+    });
   });
 
   socket.on("sync_mat", (data) => {

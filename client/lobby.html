@@ -13,23 +13,41 @@
   </head>
 
   <body>
-    <div id="gameLobby">
-      <center><h1>Lobby</h1></center>
-      <div id="lobbyContainer">
+    <header>
+      <h1> Welcome Players! </h1>
+      <div class="controlButtons">
+        <button class="syncMat button button4">Synchronize Matrix</button>
+      </div>
+      <br>
+    </header>
 
+    <div id="container">
+      <div class="playersList">
+      </div>
+      <div class="gameArena">
+        <div class="gameGrid">
+          <div class="preGame">
+            <div class="buttonWrap">
+              <button id="isReady">
+                <span>Click when ready :)</span>
+              </button>
+            </div>
+            <br>
+            <div class="announceText">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chatbox">
+        <div class="messageContainer">
+        </div>
+        <div class="textingArea">
+          <textarea class="toSend" rows="2"></textarea>
+          <button class="btn btn-primary send">Send</button>
+        </div>
       </div>
     </div>
 
-    <div id="gameArena">
-      <center>
-        <button class="newGrid">New Grid</button>
-        <button class="syncMat">Synchronize Matrix</button>
-      </center>
-      <br />
-      <center><div class="chance">Turn</div></center>
-
-      <div id="container"></div>
-    </div>
-    <br /><br />
+    <div class="lineContainer"></div>
   </body>
 </html>
