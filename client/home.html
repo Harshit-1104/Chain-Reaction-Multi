@@ -1,7 +1,6 @@
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="styles.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="homeStyles.css" />
     <script
       type="text/javascript"
       src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"
@@ -9,61 +8,109 @@
   </head>
 
   <body>
-    <center>
-      <button id="toggle-create">Create A Room</button>
-      <button id="toggle-join">Join A Room</button>
-    </center>
+    <video id="bgVideo" preload="true" autoplay loop muted>
+      <source src="./Video/Black - 13495.mp4" type="video/mp4">
+    </video>
 
-    <div id="container">
-      <form id="createRoom" action="/createRoom" method="post">
-        <div class="form-group">
-          <label for="roomName">Enter Room Name</label>
-          <input type="text" name="roomName" class="form-control" id="roomName" placeholder="ICU...">
-        </div>
-        <div class="form-group">
-          <label for="userName">Enter User Name</label>
-          <input type="text" name="userName" class="form-control" id="userName" placeholder="Demon Slayer...">
-        </div>
-        <div class="form-group">
-          <label for="numPlayers">Number of Players:</label>
-          <input type="range" value="2" min="2" max="6" name="numPlayers" class="form-control" id="numPlayers" onchange="updateTextInput(this.value);">
-          <input type="text" id="textInput" value="2" disabled>
-        </div>
-        <input type="submit" id="submit">
-      </form>
+    <div class="container">
+      <div class="form">
+        <ul class="tab-group">
+          <li class="tab active"><a href="#createRoom">Create Room</a></li>
+          <li class="tab"><a href="#joinRoom">Join Room</a></li>
+        </ul>
+        
+        <div class="tab-content">
+          <div id="createRoom">
+            <form action="/createRoom" method="post">
+            
+              <div class="field-wrap">
+                <label>
+                  Room Name
+                </label>
+                <input type="text" required autocomplete="off" id="roomName" name="roomName" />
+              </div>
 
-      <form id="joinRoom">
-        <div class="form-group">
-          <label for="roomName">Room to join</label>
-          <input type="text" name="roomName" class="form-control" id="roomName" placeholder="ICU...">
-        </div>
-        <div class="form-group">
-          <label for="userName">Enter User Name</label>
-          <input type="text" name="userName" class="form-control" id="userName" placeholder="Demon Slayer...">
-        </div>
-        <input type="submit">
-      </form>
-      <br /><br />
+              <div class="field-wrap">
+                <label>
+                  User Name
+                </label>
+                <input type="text" id="userName" name="userName" required autocomplete="off"/>
+              </div>
+            
+              <div class="field-wrap">
+                <label>
+                  Number of players
+                </label>
+                <input type="number" min="2" max="6" required autocomplete="off" id="numPlayers" name="numPlayers"/>
+              </div>
+            
+              <button type="submit" class="button button-block"/>Create</button>          
+            </form>
+
+          </div>
+          
+          <div id="joinRoom">   
+            <form action="/joinRoom" method="post">
+            
+              <div class="field-wrap">
+                <label>
+                  Room Name
+                </label>
+                <input type="text" required autocomplete="off" id="roomName" name="roomName"/>
+              </div>
+            
+              <div class="field-wrap">
+                <label>
+                  User Name
+                </label>
+                <input type="text" required autocomplete="off" id="userName" name="userName"/>
+              </div>
+            
+              <button type="submit" class="button button-block"/>Join</button>
+            </form>
+          </div>
+          
+        </div><!-- tab-content -->
+      </div> <!-- /form -->
     </div>
   </body>
 
   <script>
-    $(document).ready(function() {
-      $("#joinRoom").hide();
-    })
+    $('.form').find('input, textarea').on('keypress blur focus change', function (e) {  
+      var $this = $(this),
+          label = $this.prev('label');
+      console.log(e.type);
 
-    $("#toggle-create").click(function(){
-      $("#joinRoom").hide().attr("formnovalidate");
-      $("#createRoom").show();
+      if (e.type === 'keypress' || e.type === 'change') {
+        label.addClass('active highlight');
+      } else if (e.type === 'blur') {
+        if( $this.val() === '' ) {
+          label.removeClass('active highlight'); 
+        } else {
+          label.removeClass('highlight');   
+        }   
+      } else if (e.type === 'focus') {
+        if( $this.val() === '' ) {
+          label.removeClass('highlight'); 
+        } 
+        else if( $this.val() !== '' ) {
+          label.addClass('highlight');
+        }
+      }
     });
 
-    $("#toggle-join").click(function(){
-        $("#createRoom").hide().attr("formnovalidate");
-        $("#joinRoom").show();
-    });
+    $('.tab a').on('click', function (e) {
+      
+      e.preventDefault();
+      
+      $(this).parent().addClass('active');
+      $(this).parent().siblings().removeClass('active');
+      
+      target = $(this).attr('href');
 
-    function updateTextInput(val) {
-      document.getElementById('textInput').value = val;
-    }
+      $('.tab-content > div').not(target).hide();
+      
+      $(target).fadeIn(600);  
+    });
   </script>
 </html>

@@ -1,129 +1,277 @@
-#container {
-  position: relative;
-  top: 30px;
-  outline: 2px solid rgb(0, 0, 0);
-  margin: auto;
-  width: 500px;
-  padding: 0;
-  border: none;
+@import url("https://fonts.googleapis.com/css?family=Roboto:100");
+body {
   display: flex;
-  flex-wrap: wrap;
-}
-
-#lobbyContainer {
-  position: relative;
-  top: 30px;
-  outline: 2px solid rgb(255, 255, 255);
-  margin: auto;
-  width: 500px;
-  padding: 0;
-  border: none;
-  display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
-}
+  height: 100%;
+  background-image: url("./BACKGROUND.png"); }
 
-#joinRoom,
-#createRoom .form-control {
-  width: 30rem;
-}
-
-.chance {
-  color: rgb(0, 255, 0);
-  font-size: x-large;
-}
-
-.sub {
-  font-size: small;
-  color: aliceblue;
-}
-
-.grid {
-  margin: 0;
-  padding: 0;
-  border: none;
-  outline: 1px solid rgb(0, 0, 0);
-  display: flex;
+header {
+  display: flex !important;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: blue;
-  font-size: xx-large;
-  user-select: none;
-}
+  border: solid 2px black;
+  background: rgba(53, 58, 71, 0.4);
+  color: #f3f3f3; }
+  header .button {
+    background-color: #04AA6D;
+    border: none;
+    color: white;
+    padding: 4px 18px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px; }
+  header .button4 {
+    border-radius: 12px; }
+
+#container {
+  margin: 0;
+  padding: 0;
+  border: solid 2px black;
+  display: flex;
+  flex: 1; }
+
+.playersList {
+  display: flex;
+  border: solid 2px green;
+  flex-basis: 30%;
+  justify-content: center;
+  padding-top: 30px;
+  flex-wrap: wrap; }
+  .playersList .player {
+    margin: 10px;
+    max-width: 150px;
+    width: 150px;
+    height: 130px;
+    border: 2px solid blue;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    border-radius: 25px;
+    position: relative;
+    overflow: hidden; }
+    .playersList .player .playerDP {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center; }
+      .playersList .player .playerDP svg {
+        width: 4rem;
+        height: 4rem; }
+    .playersList .player .playerInfo {
+      width: 110%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #DFD8CA;
+      border-radius: 25px; }
+      .playersList .player .playerInfo h5 {
+        margin: 0;
+        color: black;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden; }
+    .playersList .player .checkbox {
+      background-color: #ff5757;
+      flex-basis: 25%;
+      display: block;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      appearance: none;
+      -webkit-appearance: none; }
+    .playersList .player .checkbox:checked {
+      background-color: greenyellow; }
+
+.chance {
+  box-shadow: 0px 0px 10px 2px #0ff; }
+
+.gameArena {
+  display: flex;
+  border: solid 2px yellow;
+  flex-basis: 60%;
+  justify-content: center;
+  align-items: center;
+  perspective: 400px;
+  position: relative; }
+  .gameArena .gameGrid {
+    height: 500px;
+    width: 500px;
+    display: flex;
+    flex-wrap: wrap;
+    transform-style: preserve-3d;
+    position: absolute; }
+    .gameArena .gameGrid.front {
+      transform: translateZ(30px); }
+    .gameArena .gameGrid.back {
+      transform: translateZ(0px); }
+    .gameArena .gameGrid .grid {
+      margin: 0;
+      padding: 0;
+      outline: solid 1px white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: blue;
+      font-size: xx-large;
+      user-select: none; }
+    .gameArena .gameGrid .preGame {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; }
+      .gameArena .gameGrid .preGame .buttonWrap {
+        width: 100%;
+        display: flex;
+        justify-content: center; }
+      .gameArena .gameGrid .preGame .buttonWrap .active {
+        background-color: #ff0;
+        color: #4b0082; }
+      .gameArena .gameGrid .preGame .buttonWrap:hover button {
+        background-color: #ff0;
+        color: #4b0082;
+        will-change: transform; }
+      .gameArena .gameGrid .preGame .buttonWrap:hover button::after {
+        content: 'Ready!'; }
+      .gameArena .gameGrid .preGame .buttonWrap:hover button span {
+        transition: 1s;
+        display: none; }
+      .gameArena .gameGrid .preGame button {
+        background-color: red;
+        border-radius: 3rem;
+        color: #ff0;
+        font-family: roboto;
+        font-size: 3rem;
+        font-weight: 100;
+        padding: 1rem 2rem;
+        text-decoration: none;
+        transition: 0.2s ease-in-out;
+        will-change: transform;
+        min-width: 300px; }
+      .gameArena .gameGrid .preGame .announceText {
+        color: #f3f3f3;
+        font-size: x-large;
+        text-align: center; }
+
+.chatbox {
+  display: flex;
+  border: solid 2px green;
+  flex-basis: 30%;
+  flex-direction: column; }
+  .chatbox .messageContainer {
+    flex-basis: 80%;
+    margin: 20px;
+    padding: 20px;
+    overflow: auto;
+    max-height: 500px;
+    background: rgba(21, 23, 28, 0.5); }
+    .chatbox .messageContainer .message {
+      width: 80%;
+      max-width: 250px;
+      padding: 5px 20px;
+      border-radius: 25px;
+      color: #f3f3f3;
+      margin-bottom: 10px;
+      clear: both; }
+      .chatbox .messageContainer .message.flag {
+        float: right; }
+      .chatbox .messageContainer .message .sender {
+        border-bottom: solid 1px;
+        font-weight: 600;
+        font-style: italic;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden; }
+      .chatbox .messageContainer .message .messageBody {
+        margin-bottom: 10px;
+        word-break: break-all; }
+      .chatbox .messageContainer .message .eta {
+        font-size: x-small; }
+  .chatbox .textingArea {
+    display: flex;
+    align-items: center;
+    flex-basis: 20%; }
+    .chatbox .textingArea .toSend {
+      flex-basis: 80%;
+      margin-left: 20px; }
+
+.messageContainer::-webkit-scrollbar {
+  width: 4px;
+  background-color: #F5F5F5;
+  border-radius: 20px; }
+
+.messageContainer::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: rgba(85, 85, 85, 0.5); }
 
 /* Balls CSS ---->  */
-
 .div2b {
   display: flex;
   justify-content: center;
   align-items: center;
   height: fit-content;
-  width: fit-content;
-}
+  width: fit-content; }
 
 #dirrrr {
   display: flex;
   justify-content: center;
-  align-items: center;
-}
+  align-items: center; }
 
 /*Spheres*/
 .ldng {
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  box-shadow: 0px 1px 3px 1px, 1px -7px 10px 0px inset #454545;
-}
+  box-shadow: 0px 1px 3px 1px, 1px -7px 10px 0px inset #454545; }
 
 /* Rotation CSS */
-
 @-webkit-keyframes rotateSphere /* Safari and Chrome */ {
   from {
     -webkit-transform: rotate(0deg);
     -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
+    transform: rotate(0deg); }
   to {
     -webkit-transform: rotate(360deg);
     -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
+    transform: rotate(360deg); } }
+
 @keyframes rotateSphere {
   from {
     -ms-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
     -webkit-transform: rotate(0deg);
     -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
+    transform: rotate(0deg); }
   to {
     -ms-transform: rotate(360deg);
     -moz-transform: rotate(360deg);
     -webkit-transform: rotate(360deg);
     -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
+    transform: rotate(360deg); } }
 
 .rotateSphere {
   -webkit-animation: rotateSphere 2s linear infinite;
   -moz-animation: rotateSphere 2s linear infinite;
   -ms-animation: rotateSphere 2s linear infinite;
   -o-animation: rotateSphere 2s linear infinite;
-  animation: rotateSphere 2s linear infinite;
-}
+  animation: rotateSphere 2s linear infinite; }
 
 .overlapHorizontal {
   position: relative;
-  left: -7px;
-}
+  left: -7px; }
 
 .overlapVertical {
   position: relative;
   top: -9px;
-  left: 5px;
-}
+  left: 5px; }
 
 .div3b {
   display: flex;
@@ -131,57 +279,46 @@
   align-items: center;
   height: fit-content;
   width: fit-content;
-  flex-direction: column;
-}
+  flex-direction: column; }
 
 /* rotateZ - for 3balls */
-
 @-webkit-keyframes rotating-box /* Safari and Chrome */ {
   from {
     -webkit-transform: rotate(0deg);
     -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
+    transform: rotate(0deg); }
   to {
     -webkit-transform: rotate(360deg);
     -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
+    transform: rotate(360deg); } }
+
 @keyframes rotating-box {
   from {
     -ms-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
     -webkit-transform: rotate(0deg);
     -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
+    transform: rotate(0deg); }
   to {
     -ms-transform: rotate(360deg);
     -moz-transform: rotate(360deg);
     -webkit-transform: rotate(360deg);
     -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
+    transform: rotate(360deg); } }
 
 .rotating-box {
   -webkit-animation: rotating-box 2s linear infinite;
   -moz-animation: rotating-box 2s linear infinite;
   -ms-animation: rotating-box 2s linear infinite;
   -o-animation: rotating-box 2s linear infinite;
-  animation: rotating-box 2s linear infinite;
-}
+  animation: rotating-box 2s linear infinite; }
 
 /* translation up */
-
 @-webkit-keyframes rt-up /* Safari and Chrome */ {
   to {
     -webkit-transform: translateY(-80px);
     -o-transform: translateY(-80px);
-    transform: translateY(-80px);
-  }
-}
+    transform: translateY(-80px); } }
 
 @keyframes rt-up {
   to {
@@ -189,26 +326,21 @@
     -moz-transform: translateY(-80px);
     -webkit-transform: translateY(-80px);
     -o-transform: translateY(-80px);
-    transform: translateY(-80px);
-  }
-}
+    transform: translateY(-80px); } }
+
 .rt-up {
   -webkit-animation: rt-up 0.4s linear;
   -moz-animation: rt-up 0.4s linear;
   -ms-animation: rt-up 0.4s linear;
   -o-animation: rt-up 0.4s linear;
-  animation: rt-up 0.4s linear;
-}
+  animation: rt-up 0.4s linear; }
 
 /* translation down */
-
 @-webkit-keyframes rt-down /* Safari and Chrome */ {
   to {
     -webkit-transform: translateY(80px);
     -o-transform: translateY(80px);
-    transform: translateY(80px);
-  }
-}
+    transform: translateY(80px); } }
 
 @keyframes rt-down {
   to {
@@ -216,26 +348,21 @@
     -moz-transform: translateY(80px);
     -webkit-transform: translateY(80px);
     -o-transform: translateY(80px);
-    transform: translateY(80px);
-  }
-}
+    transform: translateY(80px); } }
+
 .rt-down {
   -webkit-animation: rt-down 0.4s linear;
   -moz-animation: rt-down 0.4s linear;
   -ms-animation: rt-down 0.4s linear;
   -o-animation: rt-down 0.4s linear;
-  animation: rt-down 0.4s linear;
-}
+  animation: rt-down 0.4s linear; }
 
 /* translation left */
-
 @-webkit-keyframes rt-left /* Safari and Chrome */ {
   to {
     -webkit-transform: translateX(-80px);
     -o-transform: translateX(-80px);
-    transform: translateX(-80px);
-  }
-}
+    transform: translateX(-80px); } }
 
 @keyframes rt-left {
   to {
@@ -243,26 +370,21 @@
     -moz-transform: translateX(-80px);
     -webkit-transform: translateX(-80px);
     -o-transform: translateX(-80px);
-    transform: translateX(-80px);
-  }
-}
+    transform: translateX(-80px); } }
+
 .rt-left {
   -webkit-animation: rt-left 0.4s linear;
   -moz-animation: rt-left 0.4s linear;
   -ms-animation: rt-left 0.4s linear;
   -o-animation: rt-left 0.4s linear;
-  animation: rt-left 0.4s linear;
-}
+  animation: rt-left 0.4s linear; }
 
 /* translation right */
-
 @-webkit-keyframes rt-right /* Safari and Chrome */ {
   to {
     -webkit-transform: translateX(80px);
     -o-transform: translateX(80px);
-    transform: translateX(80px);
-  }
-}
+    transform: translateX(80px); } }
 
 @keyframes rt-right {
   to {
@@ -270,15 +392,11 @@
     -moz-transform: translateX(80px);
     -webkit-transform: translateX(80px);
     -o-transform: translateX(80px);
-    transform: translateX(80px);
-  }
-}
+    transform: translateX(80px); } }
+
 .rt-right {
   -webkit-animation: rt-right 0.4s linear;
   -moz-animation: rt-right 0.4s linear;
   -ms-animation: rt-right 0.4s linear;
   -o-animation: rt-right 0.4s linear;
-  animation: rt-right 0.4s linear;
-}
-
-/*  */
+  animation: rt-right 0.4s linear; }

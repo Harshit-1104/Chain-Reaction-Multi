@@ -34,6 +34,12 @@ app.post("/createRoom", (req, res) => {
   );
 });
 
+app.post("/joinRoom", (req, res) => {
+  return res.redirect(
+    "/lobby?room=" + req.body.roomName + "&user=" + req.body.userName
+  );
+});
+
 app.get("/lobby", (req, res) => {
   res.sendFile(__dirname + "/client/lobby.html");
 });
@@ -61,7 +67,7 @@ io.of("/").on("connection", (socket) => {
     socket.join(data.socketID); // join the sockets
     socket.join(data.room);
 
-    let isPlayer;
+    let isPlayer, id;
 
     // if globalIDs is empty -> room is full, else grab a ID
     if (cache[data.room] === undefined) {
@@ -74,7 +80,7 @@ io.of("/").on("connection", (socket) => {
       if (cache[data.room]["globalIDs"].length !== 0) {
         // get a new ID for player
         isPlayer = true;
-        let id = cache[data.room]["globalIDs"].shift();
+        id = cache[data.room]["globalIDs"].shift();
 
         // shifted room details in lobby
         // room details -> socketID = roomid
@@ -97,7 +103,7 @@ io.of("/").on("connection", (socket) => {
 
       // broadcasting new player info
       socket.broadcast.to(data.room).emit("newPlayerInfo", {
-        id: data.socketID,
+        id: id,
         isPlayer: isPlayer,
         username: data.username,
       });
@@ -106,6 +112,10 @@ io.of("/").on("connection", (socket) => {
 
   socket.on("playerStatus", (data) => {
     cache[data.room].users[data.userID].readyStatus = data.status;
+    io.sockets.in(data.room).emit("playerStatus", {
+      status: data.status,
+      id: data.userID,
+    });
 
     if (data.status) cache[data.room].cntReady++;
     else cache[data.room].cntReady--;
@@ -142,6 +152,16 @@ io.of("/").on("connection", (socket) => {
     const turns = cache[data.room].turns;
 
     cache[data.room].turns++;
+  });
+
+  socket.on("messageSent", (data) => {
+    io.sockets.in(data.room).emit("messageRecieved", {
+      room: data.room,
+      userID: data.userID,
+      msg: data.msg,
+      time: data.time,
+      username: data.username,
+    });
   });
 
   socket.on("sync_mat", (data) => {
