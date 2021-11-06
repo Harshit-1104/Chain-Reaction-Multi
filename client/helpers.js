@@ -259,11 +259,10 @@ export default {
         ele.html(
           `${grid[rows+1][columns+1][0]}`
         );
-        
-        if (colors[grid[rows+1][columns+1][1]] == -1)
+
+        if (colors[grid[rows + 1][columns + 1][1]] == -1)
           ele.css("color", "#0000ff");
-        else
-          ele.css("color", colors[grid[rows+1][columns+1][1]]);
+        else ele.css("color", colors[grid[rows + 1][columns + 1][1]]);
       }
     }
   },
@@ -329,7 +328,6 @@ export default {
         grid[curr[0]][curr[1]][0] += 1;
         ele.css("color", colors[userID]);
         grid[curr[0]][curr[1]][1] = userID;
-
       } else {
         grid[curr[0]][curr[1]][0] = 0;
         grid[curr[0]][curr[1]][1] = -1; // default

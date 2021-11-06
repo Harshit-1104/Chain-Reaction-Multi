@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 const expressServer = app.listen(port);
 const io = socketio(expressServer);
-const url = require('url');
+const url = require("url");
 
 app.use(express.static(path.join(__dirname, "client")));
 app.use(express.urlencoded());
@@ -22,7 +22,14 @@ app.get("/", (req, res) => {
 });
 
 app.post("/createRoom", (req, res) => {
-  return res.redirect("/lobby?room=" + req.body.roomName + "&user=" + req.body.userName + "&size=" + req.body.numPlayers);
+  return res.redirect(
+    "/lobby?room=" +
+      req.body.roomName +
+      "&user=" +
+      req.body.userName +
+      "&size=" +
+      req.body.numPlayers
+  );
 });
 
 app.post("/joinRoom", (req, res) => {
@@ -50,8 +57,8 @@ io.of("/").on("connection", (socket) => {
     socket.join(data.socketID); // join the sockets
     socket.join(data.room);
 
-    let id = socket.adapter.rooms[data.room].length-1;
-    
+    let id = socket.adapter.rooms[data.room].length - 1;
+
     // shifted room details in lobby
     // room details -> socketID = roomid
     roomDetails[data.socketID] = data.room;
@@ -89,15 +96,15 @@ io.of("/").on("connection", (socket) => {
     });
 
     cache[data.room].users[data.socketID].readyStatus = data.status;
-    
-    if (data.status)
-      cache[data.room].cntReady++;
-    else
-      cache[data.room].cntReady--;
+
+    if (data.status) cache[data.room].cntReady++;
+    else cache[data.room].cntReady--;
 
     console.log(cache[data.room].cntReady);
 
-    if (Object.keys(cache[data.room].users).length == cache[data.room].roomSize) {
+    if (
+      Object.keys(cache[data.room].users).length == cache[data.room].roomSize
+    ) {
       console.log("All have arrived");
 
       if (cache[data.room].cntReady == cache[data.room].roomSize) {
@@ -169,12 +176,11 @@ io.of("/").on("connection", (socket) => {
       id: deleted_id,
     });
   });
-  
+
   socket.on("reconnect", (data) => {
     console.log("reconnected", data);
   });
 });
-
 
 function initializeGrid(rows, columns) {
   let grid = new Array(rows + 2);
