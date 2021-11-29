@@ -5,7 +5,7 @@ var numberOfTurns;
 var colors = ["#04AA6D", "#F1705F", "#FF9B6A", "#CF92E1", "#014d6c", "#ffff00"];
 
 export default {
-  getOffset( el ) {
+  getOffset(el) {
     var rect = el[0].getBoundingClientRect();
     var arenaRect = $(".gameArena")[0].getBoundingClientRect();
 
@@ -13,11 +13,21 @@ export default {
       left: rect.left + window.pageXOffset,
       top: rect.top + window.pageYOffset,
       width: rect.width || el.offsetWidth,
-      height: rect.height || el.offsetHeight
+      height: rect.height || el.offsetHeight,
     };
   },
 
-  connect(div1, div2, id, color, thickness, RT=false, LB=false, update=false) { // for right bottom true both of them
+  connect(
+    div1,
+    div2,
+    id,
+    color,
+    thickness,
+    RT = false,
+    LB = false,
+    update = false
+  ) {
+    // for right bottom true both of them
     var off1 = this.getOffset(div1);
     var off2 = this.getOffset(div2);
     // bottom right
@@ -37,38 +47,61 @@ export default {
       y2 += off2.height;
     }
 
-    var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
-    var cx = ((x1 + x2) / 2) - (length / 2);
-    var cy = ((y1 + y2) / 2) - (thickness / 2);
-    var angle = Math.atan2((y1-y2),(x1-x2))*(180/Math.PI);
+    var length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    var cx = (x1 + x2) / 2 - length / 2;
+    var cy = (y1 + y2) / 2 - thickness / 2;
+    var angle = Math.atan2(y1 - y2, x1 - x2) * (180 / Math.PI);
 
     if (update) {
       var selector = `.lineContainer .${id}`;
       $(selector).css({
-        "left": `${cx}px`,
-        "top": `${cy}px`,
-        "width": `${length}px`,
-        "-moz-transform" : "rotate(" + angle + "deg)",
-        "-webkit-transform" : "rotate(" + angle + "deg)", 
-        "-o-transform" : "rotate(" + angle + "deg)",
-        "-ms-transform" : "rotate(" + angle + "deg)",
-        "transform" : "rotate(" + angle + "deg)"
-      })
+        left: `${cx}px`,
+        top: `${cy}px`,
+        width: `${length}px`,
+        "-moz-transform": "rotate(" + angle + "deg)",
+        "-webkit-transform": "rotate(" + angle + "deg)",
+        "-o-transform": "rotate(" + angle + "deg)",
+        "-ms-transform": "rotate(" + angle + "deg)",
+        transform: "rotate(" + angle + "deg)",
+      });
     } else {
-      var htmlLine = "<div class='" + id + "' style='padding:0px; margin:0px; height:" + thickness + "px; background-color:" + color + "; line-height:1px; position:absolute; left:" + cx + "px; top:" + cy + "px; width:" + length + "px; -moz-transform:rotate(" + angle + "deg); -webkit-transform:rotate(" + angle + "deg); -o-transform:rotate(" + angle + "deg); -ms-transform:rotate(" + angle + "deg); transform:rotate(" + angle + "deg);' />";
+      var htmlLine =
+        "<div class='" +
+        id +
+        "' style='padding:0px; margin:0px; height:" +
+        thickness +
+        "px; background-color:" +
+        color +
+        "; line-height:1px; position:absolute; left:" +
+        cx +
+        "px; top:" +
+        cy +
+        "px; width:" +
+        length +
+        "px; -moz-transform:rotate(" +
+        angle +
+        "deg); -webkit-transform:rotate(" +
+        angle +
+        "deg); -o-transform:rotate(" +
+        angle +
+        "deg); -ms-transform:rotate(" +
+        angle +
+        "deg); transform:rotate(" +
+        angle +
+        "deg);' />";
       $(".lineContainer").append(htmlLine);
     }
   },
 
   convertHex(hex, opacity) {
-    hex = hex.replace('#','');
-    var r = parseInt(hex.substring(0,2), 16);
-    var g = parseInt(hex.substring(2,4), 16);
-    var b = parseInt(hex.substring(4,6), 16);
-    var result = 'rgba('+r+','+g+','+b+','+opacity+')';
+    hex = hex.replace("#", "");
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+    var result = "rgba(" + r + "," + g + "," + b + "," + opacity + ")";
     return result;
   },
-  
+
   addPlayer(player) {
     console.log(player);
 
@@ -81,10 +114,13 @@ export default {
             <h5>${player.username}</h5>
           </div>
           <input type="checkbox" id="status" class="checkbox" disabled/>
-        </div>` 
+        </div>`
     );
-    
-    $(`#${player.id}`).css('background', this.convertHex(colors[player.id], 0.5));
+
+    $(`#${player.id}`).css(
+      "background",
+      this.convertHex(colors[player.id], 0.5)
+    );
   },
 
   createLobby(users, socketID) {
@@ -103,7 +139,7 @@ export default {
         </div>`
       );
 
-      $(`#${key}`).css('background', this.convertHex(colors[key], 0.5));
+      $(`#${key}`).css("background", this.convertHex(colors[key], 0.5));
     }
   },
 
@@ -114,19 +150,19 @@ export default {
   announceText(nop, nopA) {
     $(".announceText").html(
       `${nop} player have joined!<br>${nopA} players are ready!`
-    )
+    );
   },
 
   gameTimer(duration) {
     return new Promise((resolve) => {
       const timer = setInterval(function () {
         console.log(duration);
-  
+
         if (duration == 0) {
           clearInterval(timer);
           resolve();
         }
-  
+
         $(".announceText").html(`The game will begin in ... ${duration}`);
         duration--;
       }, 1000);
@@ -146,9 +182,12 @@ export default {
     let bgColor = this.convertHex(colors[id], 0.6);
 
     $(".messageContainer").append(message);
-    $(".messageContainer").children().last().css({
-      "background-color": `${bgColor}`
-    })
+    $(".messageContainer")
+      .children()
+      .last()
+      .css({
+        "background-color": `${bgColor}`,
+      });
 
     if (flag) {
       $(".messageContainer").children().last().addClass("flag");
@@ -162,13 +201,9 @@ export default {
 
     for (var rows = 0; rows < x; rows++) {
       for (var columns = 0; columns < x; columns++) {
-        $(".gameGrid.front").append(
-          `<div class='grid f ${cnt}'></div>`
-        );
+        $(".gameGrid.front").append(`<div class='grid f ${cnt}'></div>`);
 
-        $(".gameGrid.back").append(
-          `<div class='grid b ${cnt}'></div>`
-        );
+        $(".gameGrid.back").append(`<div class='grid b ${cnt}'></div>`);
 
         cnt++;
       }
@@ -176,26 +211,27 @@ export default {
 
     $(".grid").width(500 / x - 0.5);
     $(".grid").height(500 / x - 0.5);
-    (numberOfTurns = 0);
-    
+    numberOfTurns = 0;
+
     cnt = 0;
     let lineId = 0;
     for (var rows = 0; rows < x; rows++) {
       for (var columns = 0; columns < x; columns++) {
-        var div1 = `.grid.f.${cnt}`, div2 = `.grid.b.${cnt}`;
+        var div1 = `.grid.f.${cnt}`,
+          div2 = `.grid.b.${cnt}`;
         this.connect($(div1), $(div2), lineId, "white", 1);
-        
-        if (columns == x-1) {
+
+        if (columns == x - 1) {
           lineId++;
           this.connect($(div1), $(div2), lineId, "white", 1, true, false);
         }
-        
-        if (rows == x-1) {
+
+        if (rows == x - 1) {
           lineId++;
           this.connect($(div1), $(div2), lineId, "white", 1, false, true);
         }
 
-        if (columns == x-1 && rows == x-1) {
+        if (columns == x - 1 && rows == x - 1) {
           lineId++;
           this.connect($(div1), $(div2), lineId, "white", 1, true, true);
         }
@@ -253,7 +289,7 @@ export default {
 
     for (var rows = 0; rows < grid.length - 2; rows++) {
       for (var columns = 0; columns < grid.length - 2; columns++) {
-        idx = this.getIdx(rows+1, columns+1);
+        idx = this.getIdx(rows + 1, columns + 1);
         ele = $(".grid.f").eq(idx);
 
         // ele.html(
@@ -316,10 +352,13 @@ export default {
 
   async updateGrid(X, Y, userID, nop) {
     var queue = [];
+    let explode = [];
+    let level = 0;
     queue.push([X, Y]);
 
     while (queue.length !== 0) {
       console.log(queue);
+      console.log(explode, level);
       var curr = queue.shift();
 
       if (
@@ -329,6 +368,40 @@ export default {
         curr[1] > grid.length - 2
       )
         continue;
+
+      if (explode.length !== 0) {
+        // if level of element at front and end are same - blow up lower level one
+
+        if (explode.at(-1)[1] !== explode[0][1]) {
+          // level increased, blow up
+          level = explode[0][1];
+          for (let i = 0; i < explode.length; i++) {
+            if (explode[0][1] === level) {
+              let epCurr = explode.shift()[0];
+
+              var idx = this.getIdx(epCurr[0], epCurr[1]),
+                lim = this.detLim(epCurr[0], epCurr[1]);
+              var ele = $(".grid.f").eq(idx);
+
+              if (grid[curr[0]][curr[1]][0] > lim) {
+                ele.append(this.animate(colors[grid[epCurr[0]][epCurr[1]][1]]));
+
+                // remove the elements after animation finishes
+                $(".rm").bind(
+                  "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
+                  function (e) {
+                    $(this).remove();
+                  }
+                );
+              }
+            } else {
+              break;
+            }
+          }
+
+          await this.sleep(200);
+        }
+      }
 
       var idx = this.getIdx(curr[0], curr[1]),
         lim = this.detLim(curr[0], curr[1]);
@@ -362,16 +435,17 @@ export default {
         }
       } else {
         // perform animation here
-        ele.append(this.animate(colors[grid[curr[0]][curr[1]][1]]));
+
+        // ele.append(this.animate(colors[grid[curr[0]][curr[1]][1]]));
         ele.children(".ball")[0].replaceWith("");
 
         // remove the elements after animation finishes
-        $(".rm").bind(
-          "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
-          function (e) {
-            $(this).remove();
-          }
-        );
+        // $(".rm").bind(
+        //   "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
+        //   function (e) {
+        //     $(this).remove();
+        //   }
+        // );
 
         // await this.sleep(150);
 
@@ -384,11 +458,51 @@ export default {
         queue.push([curr[0] - 1, curr[1]]);
         queue.push([curr[0], curr[1] + 1]);
         queue.push([curr[0], curr[1] - 1]);
+
+        explode.push([[curr[0] + 1, curr[1]], level + 1]);
+        explode.push([[curr[0] - 1, curr[1]], level + 1]);
+        explode.push([[curr[0], curr[1] + 1], level + 1]);
+        explode.push([[curr[0], curr[1] - 1], level + 1]);
+
+        if (level === 0) {
+          ele.append(this.animate(colors[grid[curr[0]][curr[1]][1]]));
+
+          //remove the elements after animation finishes
+          $(".rm").bind(
+            "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
+            function (e) {
+              $(this).remove();
+            }
+          );
+          // level += 1;
+          await this.sleep(100);
+        }
+      }
+    }
+
+    // explode left out ones
+    for (let i = 0; i < explode.length; i++) {
+      let epCurr = explode.shift()[0];
+
+      var idx = this.getIdx(epCurr[0], epCurr[1]),
+        lim = this.detLim(epCurr[0], epCurr[1]);
+      var ele = $(".grid.f").eq(idx);
+
+      if (grid[curr[0]][curr[1]][0] > lim) {
+        ele.append(this.animate(colors[grid[epCurr[0]][epCurr[1]][1]]));
+
+        // remove the elements after animation finishes
+        $(".rm").bind(
+          "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
+          function (e) {
+            $(this).remove();
+          }
+        );
       }
     }
 
     $(`#${userID % nop}`).removeClass("chance");
-    $(`#${(userID+1) % nop}`).addClass("chance");
+    $(`#${(userID + 1) % nop}`).addClass("chance");
   },
 
   renderOne(color) {
