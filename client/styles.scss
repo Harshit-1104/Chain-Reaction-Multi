@@ -1,12 +1,14 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto:100");
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@200;400&display=swap');
 
 body {
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  background-image: url("./BACKGROUND.png");
+  justify-content: center;
+  align-items: center;
+  font-family: 'Oxanium';
+  background: linear-gradient(107.56deg, #71798A 0%, #454A55 100%);
 }
 
+/*
 header {
   display: flex !important;
   flex-direction: column;
@@ -29,85 +31,34 @@ header {
   } 
 
   .button4 {border-radius: 12px;}
-}
+}*/
 
 #container {
   margin: 0;
   padding: 0;
-  border: solid 2px rgb(0, 0, 0);
   display: flex;
-  flex: 1;
+  width: 1382px;
+  height: 618px;
+  box-shadow: rgba(0,0,0,0.6) 0px 5px 15px;
+  background: linear-gradient(106.57deg, #1A1B1F 0%, #182430 100%);
+  border-radius: 50px;
 }
 
-.playersList {
-  display: flex;
-  border: solid 2px green;
-  flex-basis: 30%;
-  justify-content: center;
-  padding-top: 30px;
-  flex-wrap: wrap;
+.checkbox {
+  background-color: rgb(255, 87, 87);
+  flex-basis: 25%;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  position: absolute;
+  right: 15px;
+  top: 17px;
+  -webkit-appearance: none;
+}
 
-  .player {
-    margin: 10px;
-    max-width: 150px;
-    width: 150px;
-    height: 130px;
-    border: 2px solid blue;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-    border-radius: 25px;
-    position: relative;
-    overflow: hidden;
-
-    .playerDP {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      
-      svg {
-        width: 4rem;
-        height: 4rem;
-      }
-    }
-    
-    .playerInfo {
-      width: 110%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #DFD8CA;
-      border-radius: 25px;
-
-      h5 {
-        margin: 0;
-        color: black;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-      }
-    }
-
-    .checkbox {
-      background-color: rgb(255, 87, 87);
-      flex-basis: 25%;
-      display: block;
-      width: 1rem;
-      height: 1rem;
-      border-radius: 50%;
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-
-    .checkbox:checked {
-      background-color: greenyellow;
-    }
-  }
+.checkbox:checked {
+  background-color: greenyellow;
 }
 
 .chance {
@@ -116,17 +67,20 @@ header {
 
 .gameArena {
   display: flex;
-  border: solid 2px yellow;
-  flex-basis: 60%;
-  justify-content: center;
-  align-items: center;
   perspective: 400px;
   position: relative;
+  background: radial-gradient(50% 73.44% at 50% 50.06%, #434343 0%, #000000 100%);
+  border: 1px solid #7D7D7D;
+  box-sizing: border-box;
+  box-shadow: 0px 8px 25px 5px #000000;
+  border-radius: 31px;
+  flex-basis: 65%;
+  margin: 24px 34px;
   
   .gameGrid {
     height: 500px;
     width: 500px;
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     transform-style: preserve-3d;
     position: absolute;
@@ -150,65 +104,125 @@ header {
       font-size: xx-large;
       user-select: none;
     }
+  }
 
-    .preGame {
-      flex: 1;
+  .preGame {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+
+    .gameName {
+      font-family: SF Distant Galaxy;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 65px;
+      line-height: 65px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      text-align: center;
+      color: #B1B1BE;
+      text-shadow: 12px 12px 9px #000000;
+      width: 60%;
+    }
 
-      .buttonWrap {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
+    #isReady {
+      width: 160px;
+      height: 55px;
+      font-size: 30px;
+      font-family: oxanium;
+      background: #FF0000;
+      box-shadow: 0px 4px 30px 5px #000000;
+      border-radius: 14px;
+      border: none;
+    }
 
-      .buttonWrap .active {
-          background-color: #ff0;
-          color: #4b0082;
-      }
-
-      .buttonWrap:hover {
-        button {
-          background-color: #ff0;
-          color: #4b0082;
-          will-change: transform;
-        }
-
-        button::after {
-          content: 'Ready!';
-        }
-
-        button span {
-          transition: 1s;
-          display: none;
-        }
-      }
-
-      button {
-        background-color: red;
-        border-radius: 3rem;
-        color: #ff0;
-        font-family: roboto;
-        font-size: 3rem;
-        font-weight: 100;
-        padding: 1rem 2rem;
-        text-decoration: none;
-        transition: 0.2s ease-in-out;
-        will-change: transform;
-        min-width: 300px;
-      }
-
-      .announceText {
-        color: #f3f3f3;
-        font-size: x-large;
-        text-align: center;
-      }
+    .announceText {
+      color: #f3f3f3;
+      font-size: 30px;
+      text-align: center;
+      font-family: oxanium;
     }
   }
 }
 
+.playerArea {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.81) 0%, rgba(67, 67, 67, 0) 91.94%);
+  border: 1px solid #7D7D7D;
+  box-sizing: border-box;
+  box-shadow: 0px 5px 25px 5px #000000;
+  border-radius: 31px;
+  flex-basis: 27%;
+  margin: 24px 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+
+  .heading {
+    margin-left: 30px;
+    margin-top: 10px;
+    font-family: Oxanium;
+    color: white;
+    font-size: 40px;
+    line-height: 1;
+  }
+
+  .divider {
+    background: #FFFFFF;
+    border: 0.25px solid #FFFFFF;
+    transform: matrix(0.85, 0, 0, 0.1, 0, 0);
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .player {
+    margin-left: 30px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+
+    .playerDP {
+      background: #C4C4C4;
+      border-radius: 30px;
+      height: 30px;
+      width: 50px;
+    }
+
+    .playerName {
+      font-family: Oxanium;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 27px;
+      color: #FFFFFF;
+      margin-left: 20px;
+    }
+  }
+
+  .typeBox {
+    background: linear-gradient(262.95deg, #222224 0%, #444651 100%);
+    border: 1px solid rgba(255, 255, 255, 0.41);
+    box-sizing: border-box;
+    box-shadow: -35px -35px 130px rgba(31, 69, 117, 0.46);
+    border-radius: 0px 0px 31px 31px;
+    margin-top: auto;
+    height: 50px;
+    display: flex;
+    align-items: center;
+
+    input {
+      background: none;
+      border: none;
+      font-family: 'Oxanium';
+      font-size: 25px;
+      margin-left: 30px;
+      outline: none;
+      color: white;
+    }
+  }
+}
+
+/*
 .chatbox {
   display: flex;
   border: solid 2px green;
@@ -280,8 +294,7 @@ header {
 	border-radius: 20px;
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
 	background-color: rgba(85,85,85,0.5);
-}
-
+}*/
 
 // Balls css
 

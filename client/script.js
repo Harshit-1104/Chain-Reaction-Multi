@@ -1,20 +1,19 @@
-// function that builds a grid in the "container"
+// Player specific variables
 var myTurn = false;
-var grid;
-var gridSize = 8;
-var numberOfTurns = 0;
-
 var socketID = "";
-let room = "ABCD";
-let username = "pqrt";
-let roomSize;
-let userID;
-let playerClick;
-let playerID;
-var readyStatus = false;
-var gameStarted = false;
+var username = "pqrt";
+var userID;
 var nop = 0,
   nopA = 0;
+var readyStatus = false
+
+// Game Specific
+var grid;
+var gridSize = [8, 8];
+var numberOfTurns = 0; // !!usage not understood
+var room = "ABCD";
+var roomSize;
+var gameStarted = false;
 
 import h from "./helpers.js";
 // create a 16x16 grid when the page loads
@@ -26,8 +25,7 @@ $(document).ready(function () {
   room = url.searchParams.get("room");
   username = url.searchParams.get("user");
   roomSize = url.searchParams.get("size");
-
-  console.log(room);
+  console.log(`Room is ${room}`);
 
   let socket = io("/");
   socket.on("connect", () => {
@@ -44,10 +42,9 @@ $(document).ready(function () {
 
   socket.on("playerInfo", (data) => {
     userID = data.id;
-    console.log(Object.keys(data.d.users).length);
     nop += Object.keys(data.d.users).length;
 
-    h.createLobby(data.d.users, userID);
+    h.createLobby(data.d.users);
 
     for (const [key, value] of Object.entries(data.d.users)) {
       if (value.readyStatus) {
@@ -67,19 +64,19 @@ $(document).ready(function () {
     }
 
     socket.on("cnt", (data) => {
-      console.log("cnt", data);
+      console.log(`Cnt: ${data}`);
     });
   });
 
   socket.on("removeLoser", (data) => {
-    console.log("lost", data);
+    console.log(`Sucker: ${data}`);
   });
 
   $(document).on("click", "#isReady", function () {
     console.log("clicked");
     readyStatus = !readyStatus;
-    console.log(readyStatus);
 
+    // This part need modifications
     if (readyStatus) {
       $(this).addClass("active");
       $(this).removeClass("nactive");
@@ -88,7 +85,8 @@ $(document).ready(function () {
       $(this).removeClass("active");
       $(this).addClass("nactive");
       $("#isReady span").html("Click when ready :)");
-    }
+    } 
+    //
 
     socket.emit("playerStatus", {
       room: room,
@@ -99,8 +97,6 @@ $(document).ready(function () {
   });
 
   socket.on("playerStatus", (data) => {
-    console.log(data);
-
     if (data.status) {
       nopA++;
       $(`#${data.id} #status`)[0].checked = true;
@@ -144,13 +140,12 @@ $(document).ready(function () {
     if (!gameStarted) return;
 
     var [X, Y] = h.getCoords($(this).index());
-    console.log(grid[X][Y][1], X, Y);
 
     if (grid[X][Y][1] !== userID && grid[X][Y][1] !== -1) {
       return;
     }
 
-    console.log(X, Y, myTurn);
+    console.log(`Turn info: ${X}, ${Y}, ${myTurn}`);
 
     if (myTurn) {
       h.updateGrid(X, Y, userID, nop);
@@ -171,20 +166,20 @@ $(document).ready(function () {
   });
 
   socket.on("isTurn", (data) => {
-    console.log("number of turns is", data.numberOfTurns);
+    console.log(`Number of turns: ${data.numberOfTurns}`);
 
     if (data.userTurn === userID) {
-      console.log("your turn, click something");
+      console.log("Your turn, click something");
       myTurn = true;
     } else {
-      console.log("Turn is of ", data.userTurn);
+      console.log(`Turn is of: ${data.userTurn}`);
       myTurn = false;
     }
   });
 
   socket.on("gameInfo", (data) => {
-    playerClick = data.playerClick;
-    playerID = data.playerID;
+    let playerClick = data.playerClick;
+    let playerID = data.playerID;
     h.updateGrid(playerClick.X, playerClick.Y, playerID, nop);
   });
 
@@ -220,7 +215,7 @@ $(document).ready(function () {
 
   $(".send").click(function () {
     let msg = $(".toSend").val();
-    console.log(msg);
+    console.log(`Message: ${msg}`);
 
     if (msg.length == 0) return;
 
@@ -228,7 +223,7 @@ $(document).ready(function () {
 
     var now = new Date();
     var dispTime = `${now.getHours()}:${now.getMinutes()}`;
-    console.log(dispTime);
+    console.log(`Time: ${dispTime}`);
 
     socket.emit("messageSent", {
       room: room,

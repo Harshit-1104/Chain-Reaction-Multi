@@ -7,7 +7,6 @@ var colors = ["#04AA6D", "#F1705F", "#FF9B6A", "#CF92E1", "#014d6c", "#ffff00"];
 export default {
   getOffset( el ) {
     var rect = el[0].getBoundingClientRect();
-    var arenaRect = $(".gameArena")[0].getBoundingClientRect();
 
     return {
       left: rect.left + window.pageXOffset,
@@ -87,7 +86,7 @@ export default {
     $(`#${player.id}`).css('background', this.convertHex(colors[player.id], 0.5));
   },
 
-  createLobby(users, socketID) {
+  createLobby(users) {
     console.log("Create Lobby", users);
 
     for (const [key, value] of Object.entries(users)) {
@@ -156,12 +155,12 @@ export default {
   },
 
   createGrid(x) {
-    x = parseInt(x);
-    grid = this.initializeGrid(x, x);
+    h = parseInt(x[0]), w = parseInt(x[1]);
+    grid = this.initializeGrid(h, w);
     var cnt = 0;
 
-    for (var rows = 0; rows < x; rows++) {
-      for (var columns = 0; columns < x; columns++) {
+    for (var rows = 0; rows < h; rows++) {
+      for (var columns = 0; columns < w; columns++) {
         $(".gameGrid.front").append(
           `<div class='grid f ${cnt}'></div>`
         );
@@ -174,28 +173,28 @@ export default {
       }
     }
 
-    $(".grid").width(500 / x - 0.5);
-    $(".grid").height(500 / x - 0.5);
+    $(".grid").width(600 / h - 0.5);
+    $(".grid").height(800 / w - 0.5);
     (numberOfTurns = 0);
     
     cnt = 0;
     let lineId = 0;
-    for (var rows = 0; rows < x; rows++) {
-      for (var columns = 0; columns < x; columns++) {
+    for (var rows = 0; rows < h; rows++) {
+      for (var columns = 0; columns < w; columns++) {
         var div1 = `.grid.f.${cnt}`, div2 = `.grid.b.${cnt}`;
         this.connect($(div1), $(div2), lineId, "white", 1);
         
-        if (columns == x-1) {
+        if (columns == w-1) {
           lineId++;
           this.connect($(div1), $(div2), lineId, "white", 1, true, false);
         }
         
-        if (rows == x-1) {
+        if (rows == h-1) {
           lineId++;
           this.connect($(div1), $(div2), lineId, "white", 1, false, true);
         }
 
-        if (columns == x-1 && rows == x-1) {
+        if (columns == w-1 && rows == h-1) {
           lineId++;
           this.connect($(div1), $(div2), lineId, "white", 1, true, true);
         }
@@ -289,26 +288,26 @@ export default {
   },
 
   getCoords(idx) {
-    var len = grid.length - 2;
+    var len = (grid[0].length-2);
     var row = Math.floor(idx / len) + 1;
     var col = (idx % len) + 1;
     return [row, col];
   },
 
   getIdx(X, Y) {
-    return (grid.length - 2) * (X - 1) + Y - 1;
+    return (grid[0].length - 2) * (X - 1) + Y - 1;
   },
 
   detLim(X, Y) {
-    var len = grid.length;
-    console.log(X, Y, len);
+    var h = grid.length, w = grid[0].length;
+    console.log(X, Y, h, w, len);
 
-    if (X > 1 && X < len - 2 && Y > 1 && Y < len - 2) return 3;
+    if (X > 1 && X < h - 2 && Y > 1 && Y < w - 2) return 3;
     else if (
       [X, Y].equals([1, 1]) ||
-      [X, Y].equals([1, len - 2]) ||
-      [X, Y].equals([len - 2, 1]) ||
-      [X, Y].equals([len - 2, len - 2])
+      [X, Y].equals([1, w - 2]) ||
+      [X, Y].equals([h - 2, 1]) ||
+      [X, Y].equals([h - 2, w - 2])
     )
       return 1;
     else return 2;
@@ -326,7 +325,7 @@ export default {
         curr[0] < 1 ||
         curr[0] > grid.length - 2 ||
         curr[1] < 1 ||
-        curr[1] > grid.length - 2
+        curr[1] > grid[0].length - 2
       )
         continue;
 

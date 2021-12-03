@@ -8,42 +8,58 @@
     ></script>
     <script type="module" src="./script.js"></script>
     <script type="text/javascript" src="proto.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/socket.io/socket.io.js"></script>
   </head>
 
   <body>
-    <header>
-      <h1> Welcome Players! </h1>
-      <div class="controlButtons">
-        <button class="syncMat button button4">Synchronize Matrix</button>
-      </div>
-      <br>
-    </header>
+    <!--button class="syncMat button button4">Synchronize Matrix</button>-->
 
     <div id="container">
-      <div class="playersList">
-      </div>
       <div class="gameArena">
         <div class="gameGrid">
-          <div class="preGame">
-            <div class="buttonWrap">
-              <button id="isReady">
-                <span>Click when ready :)</span>
-              </button>
-            </div>
-            <br>
-            <div class="announceText">
-            </div>
+        </div>
+        <div class="preGame">
+          <div class="gameName">
+            CHAIN REACTION
+          </div>
+          <br>
+          <br>
+          <button id="isReady">
+            <span>Not Ready</span>
+          </button>
+          <br>
+          <br>
+          <div class="announceText">
+            # have joined!
+            # are ready!
+          </div>
+          <div class="svgLayer">
           </div>
         </div>
       </div>
-      <div class="chatbox">
-        <div class="messageContainer">
+      <div class="playerArea">
+        <div class="heading">
+          Players
         </div>
-        <div class="textingArea">
-          <textarea class="toSend" rows="2"></textarea>
-          <button class="btn btn-primary send">Send</button>
+
+        <hr class="divider">
+        
+        <div class="player">
+          <div class="playerDp"></div>
+          <div class="playerName">Harshit</div>
+        </div>
+        <div class="player">
+          <div class="playerDp"></div>
+          <div class="playerName">Harsh</div>
+        </div>
+        <div class="player">
+          <div class="playerDp"></div>
+          <div class="playerName">Chomti</div>
+        </div>
+
+        <div class="typeBox">
+          <input placeholder="Type Something..." type="text">
         </div>
       </div>
     </div>

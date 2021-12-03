@@ -1,14 +1,12 @@
 let express = require("express");
 let app = express();
 let socketio = require("socket.io");
-
 let path = require("path");
 
 let cache = {};
 let roomDetails = {};
 
 const port = process.env.PORT || 3000;
-
 const expressServer = app.listen(port);
 const io = socketio(expressServer);
 const url = require("url");
@@ -22,7 +20,8 @@ app.get("/", (req, res) => {
 });
 
 app.post("/createRoom", (req, res) => {
-  cache[req.body.roomName] = createSchema(req.body.numPlayers);
+  let h = 8, w = 8;
+  cache[req.body.roomName] = createSchema(req.body.numPlayers, h, w);
 
   return res.redirect(
     "/lobby?room=" +
@@ -44,7 +43,7 @@ app.get("/lobby", (req, res) => {
   res.sendFile(__dirname + "/client/lobby.html");
 });
 
-function createSchema(roomSize) {
+function createSchema(roomSize, h, w) {
   let arr = [];
   for (let i = 0; i < roomSize; i++) {
     arr.push(i);
@@ -57,8 +56,9 @@ function createSchema(roomSize) {
     globalIDs: arr,
     cntReady: 0,
     turns: 0,
-    gameMatrix: initializeGrid(8, 8),
+    gameMatrix: initializeGrid(h, w),
     next_chance: 0,
+    matrixSize: [h, w],
   };
 }
 
@@ -148,9 +148,6 @@ io.of("/").on("connection", (socket) => {
     updateGrid(data.userClick.X, data.userClick.Y, data.userID, data.room, io);
 
     send_chance(data.room, io);
-
-    const turns = cache[data.room].turns;
-
     cache[data.room].turns++;
   });
 
@@ -211,6 +208,11 @@ function initializeGrid(rows, columns) {
     grid[i] = new Array(columns + 2);
   }
 
+  /*
+    i = cell value (0 default)
+    j = cell color (-1 default -> blue)
+  */
+
   for (var i = 0; i < grid.length; i++) {
     for (var j = 0; j < grid[0].length; j++) {
       grid[i][j] = [0, -1];
@@ -239,9 +241,9 @@ function updateGrid(X, Y, userID, roomName, io) {
 
     if (
       curr[0] < 1 ||
-      curr[0] > cache[roomName]["gameMatrix"].length - 2 ||
+      curr[0] > cache[roomName]["matrixSize"][0] - 2 ||
       curr[1] < 1 ||
-      curr[1] > cache[roomName]["gameMatrix"].length - 2
+      curr[1] > cache[roomName]["matrixSize"][1] - 2
     )
       continue;
 
@@ -291,14 +293,14 @@ function updateGrid(X, Y, userID, roomName, io) {
 }
 
 function detLim(X, Y, roomName) {
-  var len = cache[roomName]["gameMatrix"].length;
+  var h = cache[roomName]["matrixSize"][0], w = cache[roomName]["matrixSize"][1];
 
-  if (X > 1 && X < len - 2 && Y > 1 && Y < len - 2) return 3;
+  if (X > 1 && X < h - 2 && Y > 1 && Y < w - 2) return 3;
   else if (
     [X, Y].equals([1, 1]) ||
-    [X, Y].equals([1, len - 2]) ||
-    [X, Y].equals([len - 2, 1]) ||
-    [X, Y].equals([len - 2, len - 2])
+    [X, Y].equals([1, w - 2]) ||
+    [X, Y].equals([h - 2, 1]) ||
+    [X, Y].equals([h - 2, w - 2])
   )
     return 1;
   else return 2;
