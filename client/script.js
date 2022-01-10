@@ -49,7 +49,7 @@ $(document).ready(function () {
     for (const [key, value] of Object.entries(data.d.users)) {
       if (value.readyStatus) {
         nopA++;
-        $(`#${value.id} #status`)[0].checked = true;
+        $(`#${key} .playerStatus`)[0].checked = true;
       }
     }
 
@@ -62,14 +62,6 @@ $(document).ready(function () {
       h.addPlayer(data);
       h.announceText(nop, nopA);
     }
-
-    socket.on("cnt", (data) => {
-      console.log(`Cnt: ${data}`);
-    });
-  });
-
-  socket.on("removeLoser", (data) => {
-    console.log(`Sucker: ${data}`);
   });
 
   $(document).on("click", "#isReady", function () {
@@ -77,6 +69,7 @@ $(document).ready(function () {
     readyStatus = !readyStatus;
 
     // This part need modifications
+    
     if (readyStatus) {
       $(this).addClass("active");
       $(this).removeClass("nactive");
@@ -84,7 +77,7 @@ $(document).ready(function () {
     } else {
       $(this).removeClass("active");
       $(this).addClass("nactive");
-      $("#isReady span").html("Click when ready :)");
+      $("#isReady span").html("Not Ready");
     } 
     //
 
@@ -99,10 +92,10 @@ $(document).ready(function () {
   socket.on("playerStatus", (data) => {
     if (data.status) {
       nopA++;
-      $(`#${data.id} #status`)[0].checked = true;
+      $(`#${data.id} .playerStatus`)[0].checked = true;
     } else {
       nopA--;
-      $(`#${data.id} #status`)[0].checked = false;
+      $(`#${data.id} .playerStatus`)[0].checked = false;
     }
 
     h.announceText(nop, nopA);
@@ -110,13 +103,11 @@ $(document).ready(function () {
 
   socket.on("gameStart", async (data) => {
     console.log("Participants : ", data.users);
-    $(".gameGrid").css("filter", "");
-
     console.log("Timer start");
     await h.gameTimer(3);
     $(".preGame").remove();
-
     $(".gameArena").append("<div class='gameGrid'></div>");
+    $(".gameGrid").css("display", "flex");
 
     document.getElementsByClassName("gameGrid")[0].classList.add("front");
     document.getElementsByClassName("gameGrid")[1].classList.add("back");
@@ -124,18 +115,9 @@ $(document).ready(function () {
     grid = h.createGrid(gridSize);
     gameStarted = true;
 
-    $("#0").addClass("chance");
-  });
-
-  $(".syncMat").click(function () {
-    socket.emit("sync_mat", { room: room });
-  });
-
-  socket.on("sync_mat", (data) => {
-    console.log(data);
-    h.syncGrid(data.gameMatrix);
-  });
-
+    //$("#0").addClass("chance");
+  });  
+  
   $(document).on("click", ".grid", function () {
     if (!gameStarted) return;
 
@@ -156,13 +138,12 @@ $(document).ready(function () {
       });
       myTurn = false;
     }
+  });
 
-    // numberOfTurns++;
-
-    // if (numberOfTurns > 2 && (cnt1 == 0 || cnt2 == 0)) {
-    //   if (cnt1 > 0) alert("Green Won!");
-    //   else alert("Red Won!");
-    // }
+  socket.on("gameInfo", (data) => {
+    let playerClick = data.playerClick;
+    let playerID = data.playerID;
+    h.updateGrid(playerClick.X, playerClick.Y, playerID, nop);
   });
 
   socket.on("isTurn", (data) => {
@@ -177,11 +158,34 @@ $(document).ready(function () {
     }
   });
 
-  socket.on("gameInfo", (data) => {
-    let playerClick = data.playerClick;
-    let playerID = data.playerID;
-    h.updateGrid(playerClick.X, playerClick.Y, playerID, nop);
+  socket.on("removeLoser", (data) => {
+    console.log(`Sucker: ${data}`);
   });
+  
+  socket.on("playerLeft", (data) => {
+    console.log(data);
+    nop--;
+
+    if ($(`#${data.id} .playerStatus`)[0].checked) nopA--;
+
+    h.removePlayer(data.id);
+    h.announceText(nop, nopA);
+  });
+
+  socket.on("isWinner", (data) => {
+    console.log("Winner is: ", data.userID);
+  });
+
+  // $(".syncMat").click(function () {
+  //   socket.emit("sync_mat", { room: room });
+  // });
+
+  // socket.on("sync_mat", (data) => {
+  //   console.log(data);
+  //   h.syncGrid(data.gameMatrix);
+  // });
+
+
 
   // $(".newGrid").click(function () {
   //   h.refreshGrid();
@@ -202,16 +206,6 @@ $(document).ready(function () {
   //     }
   //   });
   // });
-
-  socket.on("playerLeft", (data) => {
-    console.log(data);
-    nop--;
-
-    if ($(`#${data.id} #status`)[0].checked) nopA--;
-
-    h.removePlayer(data.id);
-    h.announceText(nop, nopA);
-  });
 
   $(".send").click(function () {
     let msg = $(".toSend").val();
@@ -248,7 +242,6 @@ $(document).ready(function () {
 window.addEventListener(
   "resize",
   function (event) {
-    console.log("Resized");
     if (!gameStarted) return;
 
     var cnt = 0,
@@ -278,6 +271,7 @@ window.addEventListener(
         lineId++;
       }
     }
+    console.log("Resized");
   },
   true
 );

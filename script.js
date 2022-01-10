@@ -59,6 +59,7 @@ function createSchema(roomSize, h, w) {
     gameMatrix: initializeGrid(h, w),
     next_chance: 0,
     matrixSize: [h, w],
+    gameBegun: false,
   };
 }
 
@@ -96,21 +97,25 @@ io.of("/").on("connection", (socket) => {
 
         // send ID Number to the sockets.
         socket.emit("playerInfo", { id: id, d: cache[data.room] });
+
+        // broadcasting new player info
+        socket.broadcast.to(data.room).emit("newPlayerInfo", {
+          id: id,
+          isPlayer: isPlayer,
+          username: data.username,
+        });
+
       } else {
         console.log("room is full");
         isPlayer = false;
       }
 
-      // broadcasting new player info
-      socket.broadcast.to(data.room).emit("newPlayerInfo", {
-        id: id,
-        isPlayer: isPlayer,
-        username: data.username,
-      });
     }
   });
 
   socket.on("playerStatus", (data) => {
+    console.log(data, cache);
+
     cache[data.room].users[data.userID].readyStatus = data.status;
     io.sockets.in(data.room).emit("playerStatus", {
       status: data.status,
@@ -128,6 +133,7 @@ io.of("/").on("connection", (socket) => {
       if (cache[data.room].cntReady == cache[data.room].roomSize) {
         console.log("All are ready");
 
+        cache[data.room].gameBegun = true;
         io.sockets.in(data.room).emit("gameStart", {
           users: cache[data.room].users,
         });
@@ -169,6 +175,7 @@ io.of("/").on("connection", (socket) => {
     console.log("disconnected", socket.id);
 
     let details = roomDetails[socket.id];
+    console.log(details);
 
     if (details !== undefined) {
       let roomleft = details.room;
@@ -176,24 +183,35 @@ io.of("/").on("connection", (socket) => {
       let deleted_id = details.playerID;
 
       // add the id to globalIDs for new player to join;
-      cache[roomleft]["globalIDs"].push(deleted_id);
+      // [Harshit] but this must be done only before the game has begun, coz afterwards no one can join again
+      if (!cache[roomleft].gameBegun)
+        cache[roomleft]["globalIDs"].push(deleted_id);
 
       delete cache[roomleft]["users"][deleted_id];
       delete roomDetails[socket.id];
 
-      const index = cache[roomleft]["playerQueue"].indexOf(deleted_id);
+      console.log(details, cache[roomleft].users);
+      // if all the players left, then delete the room
+      if (Object.keys(cache[roomleft].users).length == 0) {
+        delete cache[roomleft];
 
-      if (index > -1) {
-        cache[roomleft]["playerQueue"].splice(index, 1);
+        console.log("Deleted Room: ", roomleft);
+
+      } else {
+        const index = cache[roomleft]["playerQueue"].indexOf(deleted_id);
+
+        if (index > -1) {
+          cache[roomleft]["playerQueue"].splice(index, 1);
+        }
+
+        socket.broadcast.to(roomleft).emit("playerLeft", {
+          id: deleted_id,
+        });
+
+        // if the chance was of disconnected player, pass the chance
+        if (socket.id === cache[roomleft]["next_chance"])
+          send_chance(roomleft, io);
       }
-
-      socket.broadcast.to(roomleft).emit("playerLeft", {
-        id: deleted_id,
-      });
-
-      // if the chance was of disconnected player, pass the chance
-      if (socket.id === cache[roomleft]["next_chance"])
-        send_chance(roomleft, io);
     }
   });
 
@@ -234,62 +252,96 @@ function initializeGrid(rows, columns) {
 
 function updateGrid(X, Y, userID, roomName, io) {
   var queue = [];
+
   queue.push([X, Y]);
+  cache[roomName]["gameMatrix"][X][Y][0]++; // initial move and then the consequences
+
+  console.log(`${X}, ${Y} after initial move: `, cache[roomName]["gameMatrix"][X][Y][0]);
+
+  var levelCount = 1; // atstart only one explodes
+  var nextLevelCount = 0;
+
+  console.log("Queue before starting", queue);
 
   while (queue.length !== 0) {
-    var curr = queue.shift();
 
-    if (
-      curr[0] < 1 ||
-      curr[0] > cache[roomName]["matrixSize"][0] - 2 ||
-      curr[1] < 1 ||
-      curr[1] > cache[roomName]["matrixSize"][1] - 2
-    )
-      continue;
+    console.log("Queue before loop ", queue, levelCount);
+    for (var i = 0; i < levelCount; i++) {
+      // cell at focus
+      var curr = queue.shift();
+      
+      // if the index is out of visible boundaries
+      if (
+        curr[0] < 1 ||
+        curr[0] > cache[roomName]["matrixSize"][0] - 2 ||
+        curr[1] < 1 ||
+        curr[1] > cache[roomName]["matrixSize"][1] - 2
+      )
+        continue;
 
-    let lim = detLim(curr[0], curr[1], roomName);
-
-    if (cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] < lim) {
+      let lim = detLim(curr[0], curr[1], roomName);
       let prevUserID = cache[roomName]["gameMatrix"][curr[0]][curr[1]][1];
-      cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = userID;
+      let currVal = cache[roomName]["gameMatrix"][curr[0]][curr[1]][0];
+      
+      console.log(lim, prevUserID, currVal, userID);
 
-      cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] += 1;
+      if (currVal <= lim) {
+        // paying dues to the players
+        if (prevUserID !== userID) {
+          cache[roomName]["users"][userID].counts++;
+          cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = userID;
 
-      if (prevUserID === userID) {
-        cache[roomName]["users"][userID].counts += 1;
+          if (prevUserID !== -1) {
+            cache[roomName]["users"][prevUserID].counts--;
+            removeLoser(io, roomName, prevUserID);
+          }
+        }
       } else {
-        cache[roomName]["users"][userID].counts +=
-          cache[roomName]["gameMatrix"][curr[0]][curr[1]][0]; // increment the count of current user
+        // now's the problem
 
-        if (prevUserID !== -1) {
-          cache[roomName]["users"][prevUserID].counts -=
-            cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] - 1; // decrement the counts of prev
+        if (currVal == lim+1) {
+          cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = -1;
+          cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] = 0;
+          // as it will leave a crater
 
-          removeLoser(io, roomName, prevUserID); //check if someone lost
+          if (prevUserID !== -1) {
+            cache[roomName]["users"][prevUserID].counts--;
+
+            if (prevUserID !== userID) // special case
+              removeLoser(io, roomName, prevUserID);
+          } 
+        } else {
+          cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = userID;
+          cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] = currVal - (lim+1);
+        
+          if (prevUserID !== userID) {
+            cache[roomName]["users"][prevUserID].counts--;
+            cache[roomName]["users"][userID].counts++;
+            removeLoser(io, roomName, prevUserID);
+          }
+        }
+
+        for (var j = -1; j< 2; j++) {
+          for (var k = -1; k< 2; k++) {
+            if (Math.abs(j) == Math.abs(k))
+              continue;
+
+            console.log(j, k, cache[roomName]["gameMatrix"][curr[0]+j][curr[1]+k]);
+            cache[roomName]["gameMatrix"][curr[0]+j][curr[1]+k][0]++;
+            queue.push([curr[0]+j, curr[1] +k]);
+            nextLevelCount++;
+          }
         }
       }
-    } else {
-      let prevUser = cache[roomName]["gameMatrix"][curr[0]][curr[1]][1];
-
-      cache[roomName]["users"][prevUser].counts -=
-        cache[roomName]["gameMatrix"][curr[0]][curr[1]][0]; //decrement count of current user
-
-      if (userID !== prevUser) {
-        // since userID can't be zero since it exploded into 4, so check only if it replaces any other
-        removeLoser(io, roomName, prevUser); //check if someone lost
-      }
-
-      cache[roomName]["gameMatrix"][curr[0]][curr[1]][0] = 0;
-      cache[roomName]["gameMatrix"][curr[0]][curr[1]][1] = -1; // default
-
-      queue.push([curr[0] + 1, curr[1]]);
-      queue.push([curr[0] - 1, curr[1]]);
-      queue.push([curr[0], curr[1] + 1]);
-      queue.push([curr[0], curr[1] - 1]);
     }
+
+    levelCount = nextLevelCount;
+    nextLevelCount = 0;
   }
 
-  io.sockets.in(roomName).emit("cnt", cache[roomName]);
+  for (const [key, value] of Object.entries(cache[roomName]["users"])) {
+    console.log(`${value.counts} is the count of ${key}\n`);
+  }
 }
 
 function detLim(X, Y, roomName) {
@@ -306,6 +358,73 @@ function detLim(X, Y, roomName) {
   else return 2;
 }
 
+function send_chance(roomName, io) {
+  // Condition -
+  // user has their chance, but due to some uncertainity, they disconnected.
+  // How to then switch chance to next user ?
+  // Implement a  `send_chance` function
+  // everytime user disconnects, check if the player with chance got disconnected? Send chance to next user
+
+  let next_chance = cache[roomName]["playerQueue"].shift();
+  // cache[roomName]["next_chance"] = next_chance; 
+
+  // if user hasn't disconnected push back into the queue
+
+  // [Harshit] question: if the user has disconnected then what will come by providing him next chance
+  // shouldn't we have to the next chance to the next available player
+
+  /*
+  if (cache[roomName].users[next_chance] !== undefined) {
+    cache[roomName]["playerQueue"].push(next_chance);
+  }*/
+
+  // !!!! Also have to check for the case when only one player is left
+
+  while (cache[roomName].users[next_chance] === undefined) {
+    next_chance = cache[roomName]["playerQueue"].shift();
+  }
+
+  cache[roomName]["playerQueue"].push(next_chance);
+  cache[roomName]["next_chance"] = next_chance;
+
+  io.sockets.in(roomName).emit("isTurn", {
+    userTurn: next_chance,
+    numberOfTurns: cache[roomName]["turns"],
+  });
+}
+
+function removeLoser(io, roomName, playerID) {
+  if (cache[roomName]["users"][playerID].counts === 0) {
+    // remove the player from playerQueue, send other users
+
+    const index = cache[roomName]["playerQueue"].indexOf(playerID);
+    if (index > -1) {
+      cache[roomName]["playerQueue"].splice(index, 1);
+    }
+
+    io.sockets.in(roomName).emit("removeLoser", {
+      userID: playerID,
+      userName: cache[roomName]["users"][playerID]["username"],
+    });
+
+    console.log(cache[roomName]["playerQueue"].length);
+
+    if (cache[roomName]["playerQueue"].length === 1) {
+      io.sockets.in(roomName).emit("isWinner", {
+        userID: cache[roomName]["playerQueue"][0],
+      });
+    }
+  }
+}
+
+
+
+
+
+
+
+
+// Keep it in last
 // Custom method to compare arrays +++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // Warn if overriding existing method
@@ -335,40 +454,3 @@ Array.prototype.equals = function (array) {
 };
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "equals", { enumerable: false });
-
-function send_chance(roomName, io) {
-  // Condition -
-  // user has their chance, but due to some uncertainity, they disconnected.
-  // How to then switch chance to next user ?
-  // Implement a  `send_chance` function
-  // everytime user disconnects, check if the player with chance got disconnected? Send chance to next user
-
-  let next_chance = cache[roomName]["playerQueue"].shift();
-  cache[roomName]["next_chance"] = next_chance;
-
-  // if user hasn't disconnected push back into the queue
-
-  if (cache[roomName].users[next_chance] !== undefined) {
-    cache[roomName]["playerQueue"].push(next_chance);
-  }
-
-  io.sockets.in(roomName).emit("isTurn", {
-    userTurn: next_chance,
-  });
-}
-
-function removeLoser(io, roomName, playerID) {
-  if (cache[roomName]["users"][playerID].counts === 0) {
-    // remove the player from playerQueue, send other users
-
-    const index = cache[roomName]["playerQueue"].indexOf(playerID);
-    if (index > -1) {
-      cache[roomName]["playerQueue"].splice(index, 1);
-    }
-
-    io.sockets.in(roomName).emit("removeLoser", {
-      userID: playerID,
-      userName: cache[roomName]["users"][playerID]["username"],
-    });
-  }
-}

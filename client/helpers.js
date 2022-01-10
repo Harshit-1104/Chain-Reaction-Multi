@@ -73,17 +73,16 @@ export default {
 
     $(`.playersList`).append(
       `<div id=${player.id} class="player">
-          <div class="playerDP">
-            <svg id="Capa_1" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="256" x2="256" y1="512" y2="0"><stop offset="0" stop-color="#5558ff"/><stop offset="1" stop-color="#00c0ff"/></linearGradient><linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="256" x2="256" y1="452" y2="91"><stop offset="0" stop-color="#addcff"/><stop offset=".5028" stop-color="#eaf6ff"/><stop offset="1" stop-color="#eaf6ff"/></linearGradient><g><g><g><circle cx="256" cy="256" fill="url(#SVGID_1_)" r="256"/></g></g><g><g><path d="m331 166c0-41.355-33.645-75-75-75s-75 33.645-75 75 33.645 75 75 75 75-33.645 75-75zm-75 75c-74.439 0-135 60.561-135 135v14.058c0 4.264 1.814 8.326 4.99 11.171 36.538 32.74 82.71 50.771 130.01 50.771 47.301 0 93.473-18.031 130.01-50.771 3.176-2.845 4.99-6.908 4.99-11.171v-14.058c0-74.439-60.561-135-135-135z" fill="url(#SVGID_2_)"/></g></g></g></svg>
+          <div class="playerDp">
           </div>
-          <div class="playerInfo">
-            <h5>${player.username}</h5>
+          <div class="playerName">
+            ${player.username}
           </div>
-          <input type="checkbox" id="status" class="checkbox" disabled/>
+          <input type="checkbox" class="playerStatus">
         </div>` 
     );
     
-    $(`#${player.id}`).css('background', this.convertHex(colors[player.id], 0.5));
+    //$(`#${player.id}`).css('background', this.convertHex(colors[player.id], 0.5));
   },
 
   createLobby(users) {
@@ -92,17 +91,16 @@ export default {
     for (const [key, value] of Object.entries(users)) {
       $(`.playersList`).append(
         `<div id=${key} class="player">
-          <div class="playerDP">
-            <svg id="Capa_1" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="256" x2="256" y1="512" y2="0"><stop offset="0" stop-color="#5558ff"/><stop offset="1" stop-color="#00c0ff"/></linearGradient><linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="256" x2="256" y1="452" y2="91"><stop offset="0" stop-color="#addcff"/><stop offset=".5028" stop-color="#eaf6ff"/><stop offset="1" stop-color="#eaf6ff"/></linearGradient><g><g><g><circle cx="256" cy="256" fill="url(#SVGID_1_)" r="256"/></g></g><g><g><path d="m331 166c0-41.355-33.645-75-75-75s-75 33.645-75 75 33.645 75 75 75 75-33.645 75-75zm-75 75c-74.439 0-135 60.561-135 135v14.058c0 4.264 1.814 8.326 4.99 11.171 36.538 32.74 82.71 50.771 130.01 50.771 47.301 0 93.473-18.031 130.01-50.771 3.176-2.845 4.99-6.908 4.99-11.171v-14.058c0-74.439-60.561-135-135-135z" fill="url(#SVGID_2_)"/></g></g></g></svg>
+          <div class="playerDp">
           </div>
-          <div class="playerInfo">
-            <h5>${value.username}</h5>
+          <div class="playerName">
+            ${value.username}
           </div>
-          <input type="checkbox" id="status" class="checkbox" disabled/>
+          <input type="checkbox" class="playerStatus">
         </div>`
       );
 
-      $(`#${key}`).css('background', this.convertHex(colors[key], 0.5));
+      //$(`#${key}`).css('background', this.convertHex(colors[key], 0.5));
     }
   },
 
@@ -155,7 +153,10 @@ export default {
   },
 
   createGrid(x) {
-    h = parseInt(x[0]), w = parseInt(x[1]);
+    const dims = $(".gameArena")[0].getBoundingClientRect()
+    const height = dims.height-50, width = dims.height-150;
+
+    var h = parseInt(x[0]), w = parseInt(x[1]);
     grid = this.initializeGrid(h, w);
     var cnt = 0;
 
@@ -173,8 +174,14 @@ export default {
       }
     }
 
-    $(".grid").width(600 / h - 0.5);
-    $(".grid").height(800 / w - 0.5);
+    $(".gameArena").css({
+      "justify-content": "center",
+      "align-items": "center"
+    });
+
+    $(".gameGrid").width(width), $(".gameGrid").height(height);
+    $(".grid").height(height / h - 0.5);
+    $(".grid").width(width / w - 0.5);
     (numberOfTurns = 0);
     
     cnt = 0;
@@ -300,7 +307,7 @@ export default {
 
   detLim(X, Y) {
     var h = grid.length, w = grid[0].length;
-    console.log(X, Y, h, w, len);
+    console.log(X, Y, h, w);
 
     if (X > 1 && X < h - 2 && Y > 1 && Y < w - 2) return 3;
     else if (
@@ -313,77 +320,176 @@ export default {
     else return 2;
   },
 
-  async updateGrid(X, Y, userID, nop) {
-    var queue = [];
-    queue.push([X, Y]);
+  async explode(toPop, userID, lim) {
+    for (var i = 0; i < toPop.length; i++) {
+      var ele = toPop[i][0], val = toPop[i][1];
 
-    while (queue.length !== 0) {
-      console.log(queue);
-      var curr = queue.shift();
+      ele.append(this.animate(colors[userID]));
 
-      if (
-        curr[0] < 1 ||
-        curr[0] > grid.length - 2 ||
-        curr[1] < 1 ||
-        curr[1] > grid[0].length - 2
-      )
-        continue;
+      //await this.sleep(400);
 
-      var idx = this.getIdx(curr[0], curr[1]),
-        lim = this.detLim(curr[0], curr[1]);
-      var ele = $(".grid.f").eq(idx);
-
-      console.log(curr, idx, ele.html()[0], lim);
-
-      if (grid[curr[0]][curr[1]][0] < lim) {
-        grid[curr[0]][curr[1]][0] += 1;
-        ele.css("color", colors[userID]);
-        grid[curr[0]][curr[1]][1] = userID;
-
-        if (grid[curr[0]][curr[1]][0] === 1) {
-          ele.append(this.renderOne(colors[grid[curr[0]][curr[1]][1]]));
-        } else if (grid[curr[0]][curr[1]][0] === 2) {
+      console.log(ele, val);
+      
+      if (val-lim === 2) {
+        if (ele.children(".ball").length == 0) {
           ele
-            .children(".ball")[0]
-            .replaceWith(
-              $.parseHTML(this.renderTwo(colors[grid[curr[0]][curr[1]][1]]))[0]
-            );
-        } else if (grid[curr[0]][curr[1]][0] === 3) {
-          ele
-            .children(".ball")[0]
-            .replaceWith(
-              $.parseHTML(
-                this.renderThree(colors[grid[curr[0]][curr[1]][1]])
-              )[0]
+            .append(
+              $.parseHTML(this.renderOne(colors[userID]))[0]
             );
         } else {
-          ele.children(".ball")[0].replaceWith("");
+          ele.children(".ball")[0]
+          .replaceWith(
+            $.parseHTML(this.renderOne(colors[userID]))[0]
+          );
+        }
+      } else if (val-lim === 3) {
+        if (ele.children(".ball").length == 0) {
+          ele
+            .append(
+              $.parseHTML(this.renderTwo(colors[userID]))[0]
+            );
+        } else {
+          ele.children(".ball")[0]
+          .replaceWith(
+            $.parseHTML(this.renderTwo(colors[userID]))[0]
+          );
+        }
+      } else if (val-lim === 4) {
+        if (ele.children(".ball").length == 0) {
+          ele
+            .append(
+              $.parseHTML(this.renderThree(colors[userID]))[0]
+            );
+        } else {
+          ele.children(".ball")[0]
+          .replaceWith(
+            $.parseHTML(this.renderThree(colors[userID]))[0]
+          );
         }
       } else {
-        // perform animation here
-        ele.append(this.animate(colors[grid[curr[0]][curr[1]][1]]));
-        ele.children(".ball")[0].replaceWith("");
-
-        // remove the elements after animation finishes
-        $(".rm").bind(
-          "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
-          function (e) {
-            $(this).remove();
-          }
-        );
-
-        // await this.sleep(150);
-
-        grid[curr[0]][curr[1]][0] = 0;
-        grid[curr[0]][curr[1]][1] = -1; // default
-
-        ele.css("color", "#0000ff");
-
-        queue.push([curr[0] + 1, curr[1]]);
-        queue.push([curr[0] - 1, curr[1]]);
-        queue.push([curr[0], curr[1] + 1]);
-        queue.push([curr[0], curr[1] - 1]);
+        if (ele.children(".ball").length !== 0)
+          ele.children(".ball")[0].replaceWith("");
       }
+      
+      // remove the elements after animation finishes
+      $(".rm").bind(
+        "animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd",
+        function () {
+          $(this).remove();
+        }
+      );
+    }
+  },
+
+  async updateGrid(X, Y, userID, nop) {
+    var queue = [];
+
+    queue.push([X, Y]);
+    grid[X][Y][0]++; // initial move
+
+    var levelCount = 1;
+    var nextLevelCount = 0;
+    var initialTurn = true;
+
+    while (queue.length !== 0) {
+      console.log("Queue in client: ", queue);
+      var toPop = [];
+
+      for (var i = 0; i< levelCount && queue.length !== 0; i++) {
+        var curr = queue.shift();
+
+        // checking if out of visible boundary
+        if (
+          curr[0] < 1 ||
+          curr[0] > grid.length - 2 ||
+          curr[1] < 1 ||
+          curr[1] > grid[0].length - 2
+        )
+          continue;
+
+        var idx = this.getIdx(curr[0], curr[1]),
+          lim = this.detLim(curr[0], curr[1]),
+          ele = $(".grid.f").eq(idx),
+          currVal = grid[curr[0]][curr[1]][0];
+
+        console.log(curr, idx, ele, lim, currVal, userID);
+        ele.css("color", colors[userID]);
+
+        if (currVal <= lim) {
+          grid[curr[0]][curr[1]][1] = userID;
+
+          if (grid[curr[0]][curr[1]][0] === 1) {
+            if (ele.children(".ball").length == 0) {
+              ele
+                .append(
+                  $.parseHTML(this.renderOne(colors[userID]))[0]
+                );
+            } else {
+              ele.children(".ball")[0]
+              .replaceWith(
+                $.parseHTML(this.renderOne(colors[userID]))[0]
+              );
+            }
+          } else if (grid[curr[0]][curr[1]][0] === 2) {
+            if (ele.children(".ball").length == 0) {
+              ele
+                .append(
+                  $.parseHTML(this.renderTwo(colors[userID]))[0]
+                );
+            } else {
+              ele.children(".ball")[0]
+              .replaceWith(
+                $.parseHTML(this.renderTwo(colors[userID]))[0]
+              );
+            }
+          } else if (grid[curr[0]][curr[1]][0] === 3) {
+            if (ele.children(".ball").length == 0) {
+              ele
+                .append(
+                  $.parseHTML(this.renderThree(colors[userID]))[0]
+                );
+            } else {
+              ele.children(".ball")[0]
+              .replaceWith(
+                $.parseHTML(this.renderThree(colors[userID]))[0]
+              );
+            }
+          } else {    
+            if (ele.children(".ball").length !== 0)
+              ele.children(".ball")[0].replaceWith("");
+          }
+
+        } else {
+          // perform animation here
+          toPop.push([ele, currVal]);
+          grid[curr[0]][curr[1]][0] = currVal-(lim+1);
+
+          if (currVal == lim+1)
+            grid[curr[0]][curr[1]][1] = -1;
+          else
+            grid[curr[0]][curr[1]][1] = userID;
+
+          for (var j = -1; j< 2; j++) {
+            for (var k = -1; k< 2; k++) {
+              if (Math.abs(j) == Math.abs(k))
+                continue;
+  
+              grid[curr[0]+j][curr[1]+k][0]++;
+              queue.push([curr[0]+j, curr[1]+k]);
+              nextLevelCount++;
+            }
+          }
+        }
+      }
+
+      console.log(toPop);
+      levelCount = nextLevelCount;
+      nextLevelCount++;
+
+      initialTurn = false;
+
+      this.explode(toPop, userID, lim);
+      await this.sleep(2000);
     }
 
     $(`#${userID % nop}`).removeClass("chance");

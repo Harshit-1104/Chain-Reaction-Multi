@@ -6,30 +6,6 @@ body {
   font-family: 'Oxanium';
   background: linear-gradient(107.56deg, #71798A 0%, #454A55 100%); }
 
-/*
-header {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: solid 2px black;
-  background: rgba(53, 58, 71, 0.4);
-  color: #f3f3f3;
-  
-  .button {
-    background-color: #04AA6D;
-    border: none;
-    color: white;
-    padding: 4px 18px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-  } 
-
-  .button4 {border-radius: 12px;}
-}*/
 #container {
   margin: 0;
   padding: 0;
@@ -39,24 +15,6 @@ header {
   box-shadow: rgba(0, 0, 0, 0.6) 0px 5px 15px;
   background: linear-gradient(106.57deg, #1A1B1F 0%, #182430 100%);
   border-radius: 50px; }
-
-.checkbox {
-  background-color: #ff5757;
-  flex-basis: 25%;
-  display: block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  position: absolute;
-  right: 15px;
-  top: 17px;
-  -webkit-appearance: none; }
-
-.checkbox:checked {
-  background-color: greenyellow; }
-
-.chance {
-  box-shadow: 0px 0px 10px 2px #0ff; }
 
 .gameArena {
   display: flex;
@@ -70,8 +28,6 @@ header {
   flex-basis: 65%;
   margin: 24px 34px; }
   .gameArena .gameGrid {
-    height: 500px;
-    width: 500px;
     display: none;
     flex-wrap: wrap;
     transform-style: preserve-3d;
@@ -104,25 +60,45 @@ header {
       font-size: 65px;
       line-height: 65px;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       text-align: center;
       color: #B1B1BE;
-      text-shadow: 12px 12px 9px #000000;
-      width: 60%; }
+      text-shadow: 12px 12px 9px #000000, 3px 3px 0px black, -3px -3px 0px black, -3px 3px 0px black, 3px -3px 0px black;
+      width: 100%;
+      flex-basis: 60%;
+      padding-bottom: 50px;
+      justify-content: center; }
     .gameArena .preGame #isReady {
       width: 160px;
       height: 55px;
       font-size: 30px;
       font-family: oxanium;
-      background: #FF0000;
       box-shadow: 0px 4px 30px 5px #000000;
       border-radius: 14px;
-      border: none; }
+      border: none;
+      transition-duration: 300ms; }
+      .gameArena .preGame #isReady.nactive {
+        background: #FF0000; }
+      .gameArena .preGame #isReady.active {
+        background: #39FF14; }
+      .gameArena .preGame #isReady.nactive:hover {
+        background: #39ff14;
+        border: solid 2px #FF0000; }
+      .gameArena .preGame #isReady.active:hover {
+        background: #FF0000;
+        border: solid 2px #39FF14; }
     .gameArena .preGame .announceText {
       color: #f3f3f3;
       font-size: 30px;
       text-align: center;
-      font-family: oxanium; }
+      font-family: oxanium;
+      flex-basis: 20%; }
+    .gameArena .preGame .main_group {
+      position: absolute;
+      /* display: none; */
+      z-index: -1;
+      width: 420px;
+      transform: translateX(-2%) translateY(-53%); }
 
 .playerArea {
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.81) 0%, rgba(67, 67, 67, 0) 91.94%);
@@ -130,7 +106,7 @@ header {
   box-sizing: border-box;
   box-shadow: 0px 5px 25px 5px #000000;
   border-radius: 31px;
-  flex-basis: 27%;
+  flex-basis: 26%;
   margin: 24px 24px 24px 24px;
   display: flex;
   flex-direction: column; }
@@ -151,7 +127,8 @@ header {
     margin-left: 30px;
     margin-top: 10px;
     display: flex;
-    align-items: center; }
+    align-items: center;
+    position: relative; }
     .playerArea .player .playerDP {
       background: #C4C4C4;
       border-radius: 30px;
@@ -164,6 +141,20 @@ header {
       font-size: 27px;
       color: #FFFFFF;
       margin-left: 20px; }
+    .playerArea .player .playerStatus {
+      width: 15px;
+      height: 15px;
+      background-color: #ff3d3d;
+      border-radius: 50%;
+      vertical-align: middle;
+      border: 1px solid #ddd;
+      appearance: none;
+      -webkit-appearance: none;
+      position: absolute;
+      top: 4px;
+      left: 38px; }
+      .playerArea .player .playerStatus:checked {
+        background-color: greenyellow; }
   .playerArea .typeBox {
     background: linear-gradient(262.95deg, #222224 0%, #444651 100%);
     border: 1px solid rgba(255, 255, 255, 0.41);
