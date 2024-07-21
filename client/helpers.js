@@ -26,16 +26,6 @@ export default {
     var x2 = off2.left;
     var y2 = off2.top;
 
-    if (RT) {
-      x1 += off1.width;
-      x2 += off2.width;
-    }
-
-    if (LB) {
-      y1 += off1.height;
-      y2 += off2.height;
-    }
-
     var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
     var cx = ((x1 + x2) / 2) - (length / 2);
     var cy = ((y1 + y2) / 2) - (thickness / 2);
@@ -81,8 +71,6 @@ export default {
           <input type="checkbox" class="playerStatus">
         </div>` 
     );
-    
-    //$(`#${player.id}`).css('background', this.convertHex(colors[player.id], 0.5));
   },
 
   createLobby(users) {
@@ -99,8 +87,6 @@ export default {
           <input type="checkbox" class="playerStatus">
         </div>`
       );
-
-      //$(`#${key}`).css('background', this.convertHex(colors[key], 0.5));
     }
   },
 
@@ -146,10 +132,6 @@ export default {
     $(".messageContainer").children().last().css({
       "background-color": `${bgColor}`
     })
-
-    if (flag) {
-      $(".messageContainer").children().last().addClass("flag");
-    }
   },
 
   createGrid(x) {
