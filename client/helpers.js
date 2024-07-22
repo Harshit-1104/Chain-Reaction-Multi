@@ -100,6 +100,18 @@ export default {
     )
   },
 
+  announceText(nop, nopA) {
+    $(".announceText").html(
+      `${nop} player have joined!<br>${nopA} players are ready!`
+    )
+  },
+
+  announceText(nop, nopA) {
+    $(".announceText").html(
+      `${nop} player have joined!<br>${nopA} players are ready!`
+    )
+  },
+
   gameTimer(duration) {
     return new Promise((resolve) => {
       const timer = setInterval(function () {
