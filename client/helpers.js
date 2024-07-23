@@ -49,14 +49,6 @@ export default {
     }
   },
 
-  convertHex(hex, opacity) {
-    hex = hex.replace('#','');
-    var r = parseInt(hex.substring(0,2), 16);
-    var g = parseInt(hex.substring(2,4), 16);
-    var b = parseInt(hex.substring(4,6), 16);
-    var result = 'rgba('+r+','+g+','+b+','+opacity+')';
-    return result;
-  },
   
   addPlayer(player) {
     console.log(player);
@@ -71,6 +63,19 @@ export default {
           <input type="checkbox" class="playerStatus">
         </div>` 
     );
+  },
+
+  convertHex(hex, opacity) {
+    hex = hex.replace('#','');
+    var r = parseInt(hex.substring(0,2), 16);
+    var g = parseInt(hex.substring(2,4), 16);
+    var b = parseInt(hex.substring(4,6), 16);
+    var result = 'rgba('+r+','+g+','+b+','+opacity+')';
+    return result;
+  },
+
+  removePlayer(id) {
+    $(`#${id}`).remove();
   },
 
   createLobby(users) {
@@ -90,42 +95,10 @@ export default {
     }
   },
 
-  removePlayer(id) {
-    $(`#${id}`).remove();
-  },
-
   announceText(nop, nopA) {
     $(".announceText").html(
       `${nop} player have joined!<br>${nopA} players are ready!`
     )
-  },
-
-  announceText(nop, nopA) {
-    $(".announceText").html(
-      `${nop} player have joined!<br>${nopA} players are ready!`
-    )
-  },
-
-  announceText(nop, nopA) {
-    $(".announceText").html(
-      `${nop} player have joined!<br>${nopA} players are ready!`
-    )
-  },
-
-  gameTimer(duration) {
-    return new Promise((resolve) => {
-      const timer = setInterval(function () {
-        console.log(duration);
-  
-        if (duration == 0) {
-          clearInterval(timer);
-          resolve();
-        }
-  
-        $(".announceText").html(`The game will begin in ... ${duration}`);
-        duration--;
-      }, 1000);
-    });
   },
 
   addMessage(username, msg, time, id, flag) {
@@ -213,6 +186,22 @@ export default {
   // function that clears the grid
   clearGrid() {
     $(".grid").remove();
+  },
+
+  gameTimer(duration) {
+    return new Promise((resolve) => {
+      const timer = setInterval(function () {
+        console.log(duration);
+  
+        if (duration == 0) {
+          clearInterval(timer);
+          resolve();
+        }
+  
+        $(".announceText").html(`The game will begin in ... ${duration}`);
+        duration--;
+      }, 1000);
+    });
   },
 
   // initialize the grid variable
